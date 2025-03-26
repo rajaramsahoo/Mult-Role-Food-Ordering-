@@ -19,7 +19,8 @@ const MainLayout = () => {
             </Button>
           </div>
         ) : (
-          <Outlet />  
+          <div className="mt-10">          <Outlet />
+          </div>
         )}
       </div>
       <Footer />

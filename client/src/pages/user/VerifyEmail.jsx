@@ -25,15 +25,15 @@ const VerifyEmail = () => {
 
     const submitHandler = async (e) => {
         e.preventDefault();
-        const verificationCode = otp.join("");
+        const verificationToken = otp.join("");
         try {
-            await axios.post(`${import.meta.env.VITE_BASEURL}/user/verifyemail`, { verificationCode })
+            await axios.post(`${import.meta.env.VITE_BASEURL}/user/verifyemail`, { verificationToken })
             navigate("/login");
 
         } catch (error) {
             console.log(error)
         }
-        console.log("Entered OTP:", verificationCode);
+        console.log("Entered OTP:", verificationToken);
     };
 
     return (

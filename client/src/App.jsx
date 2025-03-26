@@ -60,22 +60,9 @@ function App() {
         <Route path="/restaurant-owner/orders" element={<Orders />} />
 
       </Route>
-      {/* Other Routes */}
       <Route path="/signup" element={<Signup />} />
       <Route path="/login" element={<Login />} />
       <Route path="/verify-email" element={<VerifyEmail />} />
-      {/* <Route path="/restaurant" element={<Restaurant />} />
-      <Route path="/admin" element={<AdminDashboard />} />
-
-      <Route path="/sidebar" element={<Sidebar />} />
-      <Route path="/text" element={<Admin />} />
-      <Route path="/card" element={<RestaurantCard />} />
-      <Route path="/demo" element={<Demo />} />
-      <Route path="/cart" element={<Cart />} />
-      <Route path="/demo2" element={<Demo2 />} />*/}
-      <Route path="/demo1" element={<Demo1 />} />
-      {/* <Route path="/cart" element={<Cart />} /> */}
-
 
     </Routes>
   )

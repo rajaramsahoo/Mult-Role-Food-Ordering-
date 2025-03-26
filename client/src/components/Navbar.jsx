@@ -45,10 +45,16 @@ import { AuthContext } from '@/context/AuthProvider';
 const Navbar = () => {
   const { user, setUser, loading, setLoading } = useContext(AuthContext)
   console.log(user?.role)
-  const admin = false
   // const loading = false
   const cart = 1
   const navigate = useNavigate()
+  const handleLogout = () => {
+    localStorage.removeItem("user")
+    localStorage.removeItem("token")
+    setLoading(true)
+    setUser(null)
+    setLoading(false)
+  }
   return (
     <div className="w-full fixed top-0 z-50 shadow-md bg-gradient-to-r from-0% from-[#FAFAFA] to-[#FCFCFC] to-100%">
       <div className="max-w-7xl mx-auto px-0">
@@ -57,52 +63,42 @@ const Navbar = () => {
             <h1 className="font-bold md:font-extrabold md:text-2xl sm:text-xs">Ghar ka Khana</h1>
           </Link></div>
 
-          {/* <div className="relative flex items-center gap-2">
-            <Input
-              type="text"
-              // value={searchText}
-              placeholder="Search restaurant by name, city & country"
-              //  onChange={(e) => setSearchText(e.target.value)}
-              className="pl-10 shadow-lg"
-            />
-            <Search className="text-gray-500 absolute inset-y-2 left-2" />
-          </div> */}
           <div className="hidden md:flex items-center gap-6">
             <Link to="/">Home</Link>
-
-            <Menubar>
-              <MenubarMenu>
-                <MenubarTrigger>Dashboard</MenubarTrigger>
-                <MenubarContent >
-                  <Link to="/restaurant">
-                    <MenubarItem>Restaurant</MenubarItem>
-                  </Link>
-                  <Link to="/admin/menu">
-                    <MenubarItem>Menu</MenubarItem>
-                  </Link>
-                  <Link to="/admin/orders">
-                    <MenubarItem>Orders</MenubarItem>
-                  </Link>
-                </MenubarContent>
-              </MenubarMenu>
-            </Menubar>
-
-
-            {admin && (
-              <Menubar>
+            {
+              user?.role === "user" && (<Menubar>
                 <MenubarMenu>
                   <MenubarTrigger>Dashboard</MenubarTrigger>
-                  <MenubarContent>
-                    <Link to="/admin/restaurant">
+                  <MenubarContent >
+                    <Link to="/restaurant">
                       <MenubarItem>Restaurant</MenubarItem>
                     </Link>
-                    <Link to="/admin/menu">
+                    <Link to="/menu">
                       <MenubarItem>Menu</MenubarItem>
                     </Link>
-                    <Link to="/admin/orders">
+                    <Link to="/orders">
                       <MenubarItem>Orders</MenubarItem>
                     </Link>
                   </MenubarContent>
+                </MenubarMenu>
+              </Menubar>)
+            }
+            {user?.role === "admin" && (
+              <Menubar>
+                <MenubarMenu>
+                  <Link to="/admin-dashboard">
+                    <MenubarTrigger>Dashboard</MenubarTrigger>
+                  </Link>
+                </MenubarMenu>
+              </Menubar>
+            )}
+
+            {user?.role === "restaurantOwner" && (
+              <Menubar>
+                <MenubarMenu>
+                  <Link to="/restaurant-owner-dashboard">
+                    <MenubarTrigger>Dashboard</MenubarTrigger>
+                  </Link>
                 </MenubarMenu>
               </Menubar>
             )}
@@ -133,7 +129,7 @@ const Navbar = () => {
               </Avatar>
             </Link>
             {
-              user ? <Button className="bg-orange hover:bg-hoverOrange" >
+              user ? <Button className="bg-orange hover:bg-hoverOrange" onClick={handleLogout}>
                 {loading ? "Please wait..." : "Logout"}
               </Button> : <Button className="bg-orange hover:bg-hoverOrange" onClick={() => navigate("/login")}>
                 {loading ? "Please wait..." : "login"}

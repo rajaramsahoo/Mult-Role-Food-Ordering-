@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { ChevronDown, EditIcon, Filter, MoveLeft, MoveLeftIcon, MoveRight, Plus, Search } from "lucide-react"
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import {
@@ -19,8 +19,12 @@ import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { use } from 'react'
+import axios from 'axios'
 
 const Restaurant = () => {
+  let token = JSON.parse(localStorage.getItem("token"))?.token || "";
+
   const foodItems = [
     {
       id: 1,
@@ -205,13 +209,33 @@ const Restaurant = () => {
       setCurrentPage(page);
     }
   };
+  const navigate = useNavigate();
+
+  const handleGetRestaurants = async () => {
+    try {
+      const response = await axios.get(`${import.meta.env.VITE_BASEURL}/resturant`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      console.log(response.data);
+    } catch (error) {
+      console.error(error);
+
+    }
+  }
+  handleGetRestaurants()
   return (
     <div className="container px-4 py-6 sm:px-6 lg:px-8 ">
       <div className="flex flex-col gap-6">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <h1 className="text-2xl font-bold">Explore Restaurant</h1>
           <div className="flex items-center gap-2 w-full sm:w-auto">
-            <Button className="bg-orange text-white hover:bg-amber-100 hover:text-orange">
+            <Button className="bg-orange text-white hover:bg-amber-100 hover:text-orange"
+              onClick={() => navigate("/admin/partner-with-us")}>
               <Plus /> Add Restaurant
 
             </Button>

@@ -19,9 +19,21 @@ export const createRestaurant = async (req, res) => {
       imageUrl,
     });
 
-    res.status(201).json({ success: true, message: "Restaurant Added", imageUrl });
+    res.status(201).json({ success: true, message: "Restaurant Added" });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+
+export const getRestaurants = async (req, res) => {
+  try {
+    const restaurants = await resturantModel.find({}).sort({ createdAt: -1 });
+    return res.status(200).json({ success: true, restaurants })
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+
+  }
+}

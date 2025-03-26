@@ -36,30 +36,14 @@ const restaurantSchema = new mongoose.Schema(
                 type: String,
                 required: true,
                 trim: true,
-                enum: [
-                    "Indian",
-                    "Chinese",
-                    "Italian",
-                    "Mexican",
-                    "Thai",
-                    "Japanese",
-                    "French",
-                    "American",
-                    "Mediterranean",
-                    "Korean",
-                    "Spanish",
-                    "Middle Eastern",
-                    "Vietnamese",
-                    "African",
-                    "Caribbean",
-                ],
+           
             },
         ],
         menus: [
             {
                 type: mongoose.Schema.Types.ObjectId,
                 ref: "menumodel",
-                default: [], // Prevents undefined issues
+                default: [],
             },
         ],
         imageUrl: {
