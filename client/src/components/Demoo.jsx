@@ -1,599 +1,461 @@
 "use client"
 
-import { useState } from "react"
-import { MoreHorizontal, Eye, Pencil, Trash2, Filter, Check } from "lucide-react"
-
+import { useContext, useState } from "react"
+import { ChevronDown, EditIcon, Filter, HeartIcon, MoveLeft, MoveRight, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Separator } from "@/components/ui/separator"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Label } from "@/components/ui/label"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { MenuContext, type MenuItem } from "@/context/MenuProvider"
+import { AuthContext } from "@/context/AuthProvider"
+import { CartContext } from "@/context/CartProvider"
+import { MenuItemDialog } from "./components/menu-item-dialog"
 
-// Sample order data
-const orders = [
-  {
-    id: "ORD-001",
-    customer: {
-      name: "Olivia Martin",
-      email: "olivia.martin@email.com",
-      avatarUrl: "/placeholder.svg?height=32&width=32",
-    },
-    restaurantId: "REST-001",
-    restaurantName: "Pizza Palace",
-    status: "Delivered",
-    items: [
-      { name: "Margherita Pizza", quantity: 2, price: 12.99 },
-      { name: "Garlic Bread", quantity: 1, price: 4.99 },
-    ],
-    total: 30.97,
-    date: "2023-05-15T14:30:00",
-    paymentMethod: "Credit Card",
-    deliveryAddress: "123 Main St, Apt 4B, New York, NY 10001",
-  },
-  {
-    id: "ORD-002",
-    customer: {
-      name: "Jackson Lee",
-      email: "jackson.lee@email.com",
-      avatarUrl: "/placeholder.svg?height=32&width=32",
-    },
-    restaurantId: "REST-002",
-    restaurantName: "Spice Garden",
-    status: "Processing",
-    items: [
-      { name: "Chicken Biryani", quantity: 1, price: 14.99 },
-      { name: "Naan", quantity: 2, price: 2.99 },
-    ],
-    total: 20.97,
-    date: "2023-05-16T12:15:00",
-    paymentMethod: "PayPal",
-    deliveryAddress: "456 Oak Ave, Brooklyn, NY 11201",
-  },
-  {
-    id: "ORD-003",
-    customer: {
-      name: "Isabella Nguyen",
-      email: "isabella.nguyen@email.com",
-      avatarUrl: "/placeholder.svg?height=32&width=32",
-    },
-    restaurantId: "REST-003",
-    restaurantName: "Sushi Express",
-    status: "Cancelled",
-    items: [
-      { name: "California Roll", quantity: 2, price: 8.99 },
-      { name: "Miso Soup", quantity: 1, price: 3.99 },
-    ],
-    total: 21.97,
-    date: "2023-05-14T18:45:00",
-    paymentMethod: "Credit Card",
-    deliveryAddress: "789 Pine St, Queens, NY 11354",
-  },
-  {
-    id: "ORD-004",
-    customer: {
-      name: "William Kim",
-      email: "william.kim@email.com",
-      avatarUrl: "/placeholder.svg?height=32&width=32",
-    },
-    restaurantId: "REST-001",
-    restaurantName: "Pizza Palace",
-    status: "Delivered",
-    items: [
-      { name: "Pepperoni Pizza", quantity: 1, price: 14.99 },
-      { name: "Caesar Salad", quantity: 1, price: 7.99 },
-    ],
-    total: 22.98,
-    date: "2023-05-13T19:30:00",
-    paymentMethod: "Apple Pay",
-    deliveryAddress: "101 Maple Dr, Manhattan, NY 10002",
-  },
-  {
-    id: "ORD-005",
-    customer: {
-      name: "Sofia Davis",
-      email: "sofia.davis@email.com",
-      avatarUrl: "/placeholder.svg?height=32&width=32",
-    },
-    restaurantId: "REST-004",
-    restaurantName: "Burger Joint",
-    status: "Out for Delivery",
-    items: [
-      { name: "Cheeseburger", quantity: 2, price: 9.99 },
-      { name: "French Fries", quantity: 1, price: 3.99 },
-      { name: "Chocolate Shake", quantity: 2, price: 4.99 },
-    ],
-    total: 33.95,
-    date: "2023-05-16T11:20:00",
-    paymentMethod: "Credit Card",
-    deliveryAddress: "222 Elm St, Bronx, NY 10451",
-  },
-  {
-    id: "ORD-006",
-    customer: {
-      name: "Ethan Johnson",
-      email: "ethan.johnson@email.com",
-      avatarUrl: "/placeholder.svg?height=32&width=32",
-    },
-    restaurantId: "REST-002",
-    restaurantName: "Spice Garden",
-    status: "Preparing",
-    items: [
-      { name: "Butter Chicken", quantity: 1, price: 15.99 },
-      { name: "Vegetable Samosa", quantity: 2, price: 5.99 },
-    ],
-    total: 27.97,
-    date: "2023-05-16T13:45:00",
-    paymentMethod: "Google Pay",
-    deliveryAddress: "333 Cedar Blvd, Staten Island, NY 10301",
-  },
-  {
-    id: "ORD-007",
-    customer: {
-      name: "Ava Williams",
-      email: "ava.williams@email.com",
-      avatarUrl: "/placeholder.svg?height=32&width=32",
-    },
-    restaurantId: "REST-005",
-    restaurantName: "Thai Delight",
-    status: "Delivered",
-    items: [
-      { name: "Pad Thai", quantity: 1, price: 11.99 },
-      { name: "Spring Rolls", quantity: 1, price: 6.99 },
-    ],
-    total: 18.98,
-    date: "2023-05-12T20:15:00",
-    paymentMethod: "Credit Card",
-    deliveryAddress: "444 Birch St, Manhattan, NY 10003",
-  },
-  {
-    id: "ORD-008",
-    customer: {
-      name: "Noah Brown",
-      email: "noah.brown@email.com",
-      avatarUrl: "/placeholder.svg?height=32&width=32",
-    },
-    restaurantId: "REST-003",
-    restaurantName: "Sushi Express",
-    status: "Delivered",
-    items: [
-      { name: "Dragon Roll", quantity: 1, price: 12.99 },
-      { name: "Edamame", quantity: 1, price: 4.99 },
-    ],
-    total: 17.98,
-    date: "2023-05-11T19:00:00",
-    paymentMethod: "PayPal",
-    deliveryAddress: "555 Walnut Ave, Brooklyn, NY 11202",
-  },
-]
+const Menu = () => {
+  const { menu } = useContext(MenuContext)
+  const { user } = useContext(AuthContext)
+  const { addToCart } = useContext(CartContext)
 
-export function OrdersTable() {
-  const [selectedOrder, setSelectedOrder] = useState<(typeof orders)[0] | null>(null)
+  // State for dialog
+  const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null)
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+
+  const cuisines = ["All", "Italian", "Indian", "Thai", "American", "Japanese", "Chinese", "Mexican"]
+  const [activeTab, setActiveTab] = useState("all")
   const [searchQuery, setSearchQuery] = useState("")
-  const [statusFilter, setStatusFilter] = useState<string | null>(null)
+  const [selectedCuisine, setSelectedCuisine] = useState("All")
+  const [dietFilter, setDietFilter] = useState("all")
+  const [sortOrder, setSortOrder] = useState("popularity")
 
-  // Filter orders based on search query and status filter
-  const filteredOrders = orders.filter((order) => {
-    const matchesSearch =
-      order.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      order.customer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      order.restaurantName.toLowerCase().includes(searchQuery.toLowerCase())
-
-    const matchesStatus = statusFilter ? order.status === statusFilter : true
-
-    return matchesSearch && matchesStatus
+  const filteredItems = menu.filter((item) => {
+    if (searchQuery && !item.name.toLowerCase().includes(searchQuery.toLowerCase())) {
+      return false
+    }
+    if (selectedCuisine !== "All" && item.cusine !== selectedCuisine) {
+      return false
+    }
+    if (dietFilter === "veg" && item.vegNonVeg !== "veg") {
+      return false
+    }
+    if (dietFilter === "nonveg" && item.vegNonVeg !== "nonveg") {
+      return false
+    }
+    return true
   })
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    return new Intl.DateTimeFormat("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    }).format(date)
-  }
+  const sortedItems = [...filteredItems].sort((a, b) => {
+    if (sortOrder === "a-z") {
+      return a.name.localeCompare(b.name)
+    } else if (sortOrder === "z-a") {
+      return b.name.localeCompare(a.name)
+    } else if (sortOrder === "price-low") {
+      return a.price - b.price
+    } else if (sortOrder === "price-high") {
+      return b.price - a.price
+    }
+    return b.rating - a.rating
+  })
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "Delivered":
-        return "success"
-      case "Processing":
-      case "Preparing":
-        return "default"
-      case "Out for Delivery":
-        return "warning"
-      case "Cancelled":
-        return "destructive"
-      default:
-        return "secondary"
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 6 // Number of items per page
+
+  // Calculate total pages
+  const totalPages = Math.ceil(sortedItems.length / itemsPerPage)
+
+  // Get paginated items
+  const paginatedItems = sortedItems.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page)
     }
   }
 
+  const handleAddToCart = async (item: MenuItem) => {
+    if (!user) return
+
+    try {
+      const cartItem = {
+        menuItemId: item._id,
+        name: item.name,
+        quantity: 1,
+        image: item.image,
+        price: item.price,
+        email: user.email,
+      }
+      await addToCart(cartItem, user.email)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  const openItemDialog = (item: MenuItem) => {
+    setSelectedItem(item)
+    setIsDialogOpen(true)
+  }
+
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <div>
-          <CardTitle>Orders</CardTitle>
-          <CardDescription>View and manage customer orders across all restaurants.</CardDescription>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="relative">
-            <Input
-              placeholder="Search orders..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-[200px] lg:w-[300px]"
-            />
-          </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline">
-                <Filter className="mr-2 h-4 w-4" />
-                Filter
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Filter by Status</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => setStatusFilter(null)}>
-                All
-                {statusFilter === null && <Check className="ml-auto h-4 w-4" />}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setStatusFilter("Processing")}>
-                Processing
-                {statusFilter === "Processing" && <Check className="ml-auto h-4 w-4" />}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setStatusFilter("Preparing")}>
-                Preparing
-                {statusFilter === "Preparing" && <Check className="ml-auto h-4 w-4" />}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setStatusFilter("Out for Delivery")}>
-                Out for Delivery
-                {statusFilter === "Out for Delivery" && <Check className="ml-auto h-4 w-4" />}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setStatusFilter("Delivered")}>
-                Delivered
-                {statusFilter === "Delivered" && <Check className="ml-auto h-4 w-4" />}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setStatusFilter("Cancelled")}>
-                Cancelled
-                {statusFilter === "Cancelled" && <Check className="ml-auto h-4 w-4" />}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[100px]">Order ID</TableHead>
-                <TableHead>Customer</TableHead>
-                <TableHead>Restaurant</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Total</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredOrders.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={7} className="h-24 text-center">
-                    No orders found.
-                  </TableCell>
-                </TableRow>
-              ) : (
-                filteredOrders.map((order) => (
-                  <TableRow key={order.id}>
-                    <TableCell className="font-medium">{order.id}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-8 w-8">
-                          <AvatarImage src={order.customer.avatarUrl} alt={order.customer.name} />
-                          <AvatarFallback>{order.customer.name.substring(0, 2).toUpperCase()}</AvatarFallback>
-                        </Avatar>
-                        <div className="flex flex-col">
-                          <span className="font-medium">{order.customer.name}</span>
-                          <span className="text-xs text-muted-foreground">{order.customer.email}</span>
+    <div className="container px-4 py-6 sm:px-6 lg:p-6 ">
+      <div className="flex flex-col gap-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <h1 className="text-2xl font-bold">Explore Menu</h1>
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <div className="relative w-full sm:w-[300px]">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="search"
+                placeholder="Search for food..."
+                className="pl-8 w-full"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="outline" size="icon" className="shrink-0 md:hidden">
+                  <Filter className="h-4 w-4" />
+                  <span className="sr-only">Filter</span>
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right">
+                <div className="grid gap-6 py-6 max-h-[80vh] overflow-y-auto">
+                  <div>
+                    <h3 className="font-medium mb-3">Cuisine</h3>
+                    <div className="grid gap-2">
+                      {cuisines.map((cuisine) => (
+                        <div key={cuisine} className="flex items-center gap-2">
+                          <Checkbox
+                            id={`cuisine-${cuisine}`}
+                            checked={selectedCuisine === cuisine}
+                            onCheckedChange={() => setSelectedCuisine(cuisine)}
+                          />
+                          <Label htmlFor={`cuisine-${cuisine}`}>{cuisine}</Label>
                         </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className="font-medium mb-3">Diet Preference</h3>
+                    <RadioGroup value={dietFilter} onValueChange={setDietFilter}>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="all" id="all" />
+                        <Label htmlFor="all">All</Label>
                       </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-col">
-                        <span className="font-medium">{order.restaurantName}</span>
-                        <span className="text-xs text-muted-foreground">ID: {order.restaurantId}</span>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="veg" id="veg" />
+                        <Label htmlFor="veg">Vegetarian</Label>
                       </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={getStatusColor(order.status) as any}>{order.status}</Badge>
-                    </TableCell>
-                    <TableCell className="text-right font-medium">${order.total.toFixed(2)}</TableCell>
-                    <TableCell>{formatDate(order.date)}</TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button variant="outline" size="icon" onClick={() => setSelectedOrder(order)}>
-                              <Eye className="h-4 w-4" />
-                              <span className="sr-only">View</span>
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent className="sm:max-w-[600px]">
-                            <DialogHeader>
-                              <DialogTitle>Order Details</DialogTitle>
-                              <DialogDescription>
-                                Complete information about order {selectedOrder?.id}
-                              </DialogDescription>
-                            </DialogHeader>
-                            {selectedOrder && (
-                              <div className="grid gap-4 py-4">
-                                <div className="grid grid-cols-2 gap-4">
-                                  <div>
-                                    <h3 className="font-medium mb-2">Order Information</h3>
-                                    <div className="text-sm">
-                                      <p>
-                                        <span className="text-muted-foreground">Order ID:</span> {selectedOrder.id}
-                                      </p>
-                                      <p>
-                                        <span className="text-muted-foreground">Date:</span>{" "}
-                                        {formatDate(selectedOrder.date)}
-                                      </p>
-                                      <p>
-                                        <span className="text-muted-foreground">Status:</span>
-                                        <Badge variant={getStatusColor(selectedOrder.status) as any} className="ml-2">
-                                          {selectedOrder.status}
-                                        </Badge>
-                                      </p>
-                                      <p>
-                                        <span className="text-muted-foreground">Payment Method:</span>{" "}
-                                        {selectedOrder.paymentMethod}
-                                      </p>
-                                    </div>
-                                  </div>
-                                  <div>
-                                    <h3 className="font-medium mb-2">Customer Information</h3>
-                                    <div className="text-sm">
-                                      <p>
-                                        <span className="text-muted-foreground">Name:</span>{" "}
-                                        {selectedOrder.customer.name}
-                                      </p>
-                                      <p>
-                                        <span className="text-muted-foreground">Email:</span>{" "}
-                                        {selectedOrder.customer.email}
-                                      </p>
-                                      <p>
-                                        <span className="text-muted-foreground">Delivery Address:</span>{" "}
-                                        {selectedOrder.deliveryAddress}
-                                      </p>
-                                    </div>
-                                  </div>
-                                </div>
-
-                                <Separator />
-
-                                <div>
-                                  <h3 className="font-medium mb-2">Restaurant Information</h3>
-                                  <div className="text-sm">
-                                    <p>
-                                      <span className="text-muted-foreground">Restaurant ID:</span>{" "}
-                                      {selectedOrder.restaurantId}
-                                    </p>
-                                    <p>
-                                      <span className="text-muted-foreground">Restaurant Name:</span>{" "}
-                                      {selectedOrder.restaurantName}
-                                    </p>
-                                  </div>
-                                </div>
-
-                                <Separator />
-
-                                <div>
-                                  <h3 className="font-medium mb-2">Order Items</h3>
-                                  <div className="rounded-md border">
-                                    <Table>
-                                      <TableHeader>
-                                        <TableRow>
-                                          <TableHead>Item</TableHead>
-                                          <TableHead className="text-right">Quantity</TableHead>
-                                          <TableHead className="text-right">Price</TableHead>
-                                          <TableHead className="text-right">Subtotal</TableHead>
-                                        </TableRow>
-                                      </TableHeader>
-                                      <TableBody>
-                                        {selectedOrder.items.map((item, index) => (
-                                          <TableRow key={index}>
-                                            <TableCell>{item.name}</TableCell>
-                                            <TableCell className="text-right">{item.quantity}</TableCell>
-                                            <TableCell className="text-right">${item.price.toFixed(2)}</TableCell>
-                                            <TableCell className="text-right">
-                                              ${(item.quantity * item.price).toFixed(2)}
-                                            </TableCell>
-                                          </TableRow>
-                                        ))}
-                                        <TableRow>
-                                          <TableCell colSpan={3} className="text-right font-medium">
-                                            Total
-                                          </TableCell>
-                                          <TableCell className="text-right font-bold">
-                                            ${selectedOrder.total.toFixed(2)}
-                                          </TableCell>
-                                        </TableRow>
-                                      </TableBody>
-                                    </Table>
-                                  </div>
-                                </div>
-                              </div>
-                            )}
-                            <DialogFooter>
-                              <Button variant="outline" onClick={() => setSelectedOrder(null)}>
-                                Close
-                              </Button>
-                            </DialogFooter>
-                          </DialogContent>
-                        </Dialog>
-
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button variant="outline" size="icon" onClick={() => setSelectedOrder(order)}>
-                              <Pencil className="h-4 w-4" />
-                              <span className="sr-only">Edit</span>
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent className="sm:max-w-[425px]">
-                            <DialogHeader>
-                              <DialogTitle>Edit Order</DialogTitle>
-                              <DialogDescription>Update the order status and details.</DialogDescription>
-                            </DialogHeader>
-                            {selectedOrder && (
-                              <div className="grid gap-4 py-4">
-                                <div className="grid grid-cols-4 items-center gap-4">
-                                  <Label htmlFor="order-id" className="text-right">
-                                    Order ID
-                                  </Label>
-                                  <Input id="order-id" className="col-span-3" value={selectedOrder.id} disabled />
-                                </div>
-                                <div className="grid grid-cols-4 items-center gap-4">
-                                  <Label htmlFor="restaurant-id" className="text-right">
-                                    Restaurant ID
-                                  </Label>
-                                  <Input
-                                    id="restaurant-id"
-                                    className="col-span-3"
-                                    defaultValue={selectedOrder.restaurantId}
-                                  />
-                                </div>
-                                <div className="grid grid-cols-4 items-center gap-4">
-                                  <Label htmlFor="status" className="text-right">
-                                    Status
-                                  </Label>
-                                  <Select defaultValue={selectedOrder.status}>
-                                    <SelectTrigger id="status" className="col-span-3">
-                                      <SelectValue placeholder="Select status" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      <SelectItem value="Processing">Processing</SelectItem>
-                                      <SelectItem value="Preparing">Preparing</SelectItem>
-                                      <SelectItem value="Out for Delivery">Out for Delivery</SelectItem>
-                                      <SelectItem value="Delivered">Delivered</SelectItem>
-                                      <SelectItem value="Cancelled">Cancelled</SelectItem>
-                                    </SelectContent>
-                                  </Select>
-                                </div>
-                                <div className="grid grid-cols-4 items-center gap-4">
-                                  <Label htmlFor="delivery-address" className="text-right">
-                                    Delivery Address
-                                  </Label>
-                                  <Input
-                                    id="delivery-address"
-                                    className="col-span-3"
-                                    defaultValue={selectedOrder.deliveryAddress}
-                                  />
-                                </div>
-                              </div>
-                            )}
-                            <DialogFooter>
-                              <Button type="submit">Save Changes</Button>
-                            </DialogFooter>
-                          </DialogContent>
-                        </Dialog>
-
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button variant="outline" size="icon" className="text-destructive">
-                              <Trash2 className="h-4 w-4" />
-                              <span className="sr-only">Delete</span>
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                This action cannot be undone. This will permanently delete the order and remove the data
-                                from our servers.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction className="bg-destructive text-destructive-foreground">
-                                Delete
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <MoreHorizontal className="h-4 w-4" />
-                              <span className="sr-only">More options</span>
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <DropdownMenuItem>Print invoice</DropdownMenuItem>
-                            <DropdownMenuItem>Contact customer</DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem className="text-destructive">Cancel order</DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="nonveg" id="nonveg" />
+                        <Label htmlFor="nonveg">Non-Vegetarian</Label>
                       </div>
-                    </TableCell>
-                  </TableRow>
-                ))
+                    </RadioGroup>
+                  </div>
+                  <div>
+                    <h3 className="font-medium mb-3">Sort By</h3>
+                    <RadioGroup value={sortOrder} onValueChange={setSortOrder}>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="popularity" id="popularity" />
+                        <Label htmlFor="popularity">Popularity</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="a-z" id="a-z" />
+                        <Label htmlFor="a-z">Name (A-Z)</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="z-a" id="z-a" />
+                        <Label htmlFor="z-a">Name (Z-A)</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="price-low" id="price-low" />
+                        <Label htmlFor="price-low">Price (Low to High)</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="price-high" id="price-high" />
+                        <Label htmlFor="price-high">Price (High to Low)</Label>
+                      </div>
+                    </RadioGroup>
+                  </div>
+                </div>
+              </SheetContent>
+            </Sheet>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="hidden md:flex">
+                  <Filter className="mr-2 h-4 w-4" />
+                  Filters
+                  <ChevronDown className="ml-2 h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56 max-h-[60vh] overflow-y-auto">
+                <DropdownMenuLabel>Cuisine</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuGroup>
+                  {cuisines.map((cuisine) => (
+                    <DropdownMenuItem
+                      key={cuisine}
+                      onClick={() => setSelectedCuisine(cuisine)}
+                      className={selectedCuisine === cuisine ? "bg-muted" : ""}
+                    >
+                      {cuisine}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuGroup>
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel>Diet Preference</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => setDietFilter("all")}
+                  className={dietFilter === "all" ? "bg-muted" : ""}
+                >
+                  All
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => setDietFilter("veg")}
+                  className={dietFilter === "veg" ? "bg-muted" : ""}
+                >
+                  Vegetarian
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => setDietFilter("nonveg")}
+                  className={dietFilter === "nonveg" ? "bg-muted" : ""}
+                >
+                  Non-Vegetarian
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel>Sort By</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => setSortOrder("popularity")}
+                  className={sortOrder === "popularity" ? "bg-muted" : ""}
+                >
+                  Popularity
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSortOrder("a-z")} className={sortOrder === "a-z" ? "bg-muted" : ""}>
+                  Name (A-Z)
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSortOrder("z-a")} className={sortOrder === "z-a" ? "bg-muted" : ""}>
+                  Name (Z-A)
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => setSortOrder("price-low")}
+                  className={sortOrder === "price-low" ? "bg-muted" : ""}
+                >
+                  Price (Low to High)
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => setSortOrder("price-high")}
+                  className={sortOrder === "price-high" ? "bg-muted" : ""}
+                >
+                  Price (High to Low)
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
+
+        <Tabs defaultValue="all" className="w-full" onValueChange={setActiveTab}>
+          <TabsList className="mb-4 w-full sm:w-auto flex overflow-auto">
+            <TabsTrigger value="all">All</TabsTrigger>
+            <TabsTrigger value="popular">Popular</TabsTrigger>
+            <TabsTrigger value="offers">Offers</TabsTrigger>
+            <TabsTrigger value="healthy">Healthy</TabsTrigger>
+            <TabsTrigger value="quick">Quick Delivery</TabsTrigger>
+          </TabsList>
+
+          <div className="flex items-center gap-2 mb-4 flex-wrap">
+            {selectedCuisine !== "All" && (
+              <Badge variant="outline" className="flex items-center gap-1">
+                Cuisine: {selectedCuisine}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-4 w-4 ml-1 p-0"
+                  onClick={() => setSelectedCuisine("All")}
+                >
+                  <span className="sr-only">Remove</span>×
+                </Button>
+              </Badge>
+            )}
+            {dietFilter !== "all" && (
+              <Badge variant="outline" className="flex items-center gap-1">
+                {dietFilter === "veg" ? "Vegetarian" : "Non-Vegetarian"}
+                <Button variant="ghost" size="icon" className="h-4 w-4 ml-1 p-0" onClick={() => setDietFilter("all")}>
+                  <span className="sr-only">Remove</span>×
+                </Button>
+              </Badge>
+            )}
+            {sortOrder !== "popularity" && (
+              <Badge variant="outline" className="flex items-center gap-1">
+                Sort:{" "}
+                {sortOrder === "a-z"
+                  ? "A-Z"
+                  : sortOrder === "z-a"
+                    ? "Z-A"
+                    : sortOrder === "price-low"
+                      ? "Price (Low to High)"
+                      : "Price (High to Low)"}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-4 w-4 ml-1 p-0"
+                  onClick={() => setSortOrder("popularity")}
+                >
+                  <span className="sr-only">Remove</span>×
+                </Button>
+              </Badge>
+            )}
+          </div>
+
+          <TabsContent value="all" className="mt-0">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 z-0">
+              {paginatedItems.map((item) => (
+                <div key={item._id} className="group">
+                  <Card className="overflow-hidden rounded-xl">
+                    <div className="relative">
+                      <img
+                        src={item.image || "/placeholder.svg"}
+                        alt={item.name}
+                        className="w-full h-48 object-cover rounded-t-xl"
+                      />
+
+                      <Badge
+                        className={`absolute top-2 left-2 text-white ${item.vegNonVeg === "veg" ? "bg-green-500" : "bg-red-500"}`}
+                      >
+                        {item.vegNonVeg}
+                      </Badge>
+                      <span className="absolute top-2 right-2 bg-white p-1 rounded-full shadow">
+                        <HeartIcon size={16} />
+                      </span>
+
+                      <Badge
+                        className="absolute bottom-2 right-2 bg-white text-black z-10 cursor-pointer"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          openItemDialog(item)
+                        }}
+                      >
+                        <EditIcon size={16} />
+                      </Badge>
+                    </div>
+
+                    <CardContent className="p-3 cursor-pointer" onClick={() => openItemDialog(item)}>
+                      {/* Heading and Price aligned properly */}
+                      <div className="flex justify-between items-center">
+                        <h6 className="font-semibold group-hover:text-primary transition-colors text-left">
+                          {item.name}
+                        </h6>
+                        <Badge className="bg-white text-black">${item.price.toFixed(2)}</Badge>
+                      </div>
+
+                      <p className="text-[12px] text-muted-foreground min-h-[40px] overflow-hidden line-clamp-2">
+                        {item.description}
+                      </p>
+
+                      {/* Cuisine on the left, Button on the right */}
+                      <div className="flex justify-between items-center mt-2">
+                        <p className="text-xs text-muted-foreground truncate">{item.cusine}</p>
+                        <Button
+                          className="text-[10px] px-3 py-1 rounded-full h-8 z-10"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleAddToCart(item)
+                          }}
+                        >
+                          Add to Cart
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              ))}
+            </div>
+
+            {paginatedItems.length === 0 && (
+              <div className="text-center py-12">
+                <h3 className="text-lg font-medium">No items found</h3>
+                <p className="text-muted-foreground mt-1">Try adjusting your filters</p>
+              </div>
+            )}
+            <div className="flex justify-center items-center mt-6 gap-2">
+              {currentPage > 1 && (
+                <Button
+                  className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 text-black"
+                  onClick={() => handlePageChange(currentPage - 1)}
+                >
+                  <MoveLeft />
+                </Button>
               )}
-            </TableBody>
-          </Table>
-        </div>
-        <div className="flex items-center justify-end space-x-2 py-4">
-          <div className="flex-1 text-sm text-muted-foreground">
-            Showing <strong>{filteredOrders.length}</strong> of <strong>{orders.length}</strong> orders
-          </div>
-          <div className="space-x-2">
-            <Button variant="outline" size="sm" disabled>
-              Previous
-            </Button>
-            <Button variant="outline" size="sm">
-              Next
-            </Button>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+
+              {Array.from({ length: totalPages }, (_, index) => (
+                <Button
+                  key={index}
+                  className={`px-4 py-2 rounded ${currentPage === index + 1 ? "bg-orange text-black" : "bg-gray-200"}`}
+                  onClick={() => handlePageChange(index + 1)}
+                >
+                  {index + 1}
+                </Button>
+              ))}
+              {currentPage < totalPages && (
+                <Button
+                  className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300"
+                  onClick={() => handlePageChange(currentPage + 1)}
+                >
+                  <MoveRight />
+                </Button>
+              )}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="popular" className="mt-0">
+            <div className="text-center py-12">
+              <h3 className="text-lg font-medium">Popular items</h3>
+              <p className="text-muted-foreground mt-1">This tab would show popular items</p>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="offers" className="mt-0">
+            <div className="text-center py-12">
+              <h3 className="text-lg font-medium">Special offers</h3>
+              <p className="text-muted-foreground mt-1">This tab would show items with special offers</p>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="healthy" className="mt-0">
+            <div className="text-center py-12">
+              <h3 className="text-lg font-medium">Healthy options</h3>
+              <p className="text-muted-foreground mt-1">This tab would show healthy food options</p>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="quick" className="mt-0">
+            <div className="text-center py-12">
+              <h3 className="text-lg font-medium">Quick delivery</h3>
+              <p className="text-muted-foreground mt-1">This tab would show items with quick delivery</p>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
+
+      {/* Dialog for viewing/editing menu item */}
+      <MenuItemDialog item={selectedItem} isOpen={isDialogOpen} onClose={() => setIsDialogOpen(false)} />
+    </div>
   )
 }
+
+export default Menu
 

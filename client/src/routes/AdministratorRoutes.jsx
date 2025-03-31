@@ -6,7 +6,7 @@ const AdministratorRoutes = ({ user }) => {
     if (!user) {
         return <Navigate to="/login" />;
     }
-    if (user.role == !"admin") {
+    if (user.role !== "admin") {
         return <Navigate to="/admin-dashboard" />;
     }
 

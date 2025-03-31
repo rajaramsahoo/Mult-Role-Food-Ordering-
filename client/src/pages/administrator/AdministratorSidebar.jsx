@@ -1,11 +1,13 @@
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
 import { Home, LayoutDashboard, Users, Utensils, List, ShoppingCart, MessageSquare } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
+import { AuthContext } from '@/context/AuthProvider';
 
 const AdministratorSidebar = () => {
   const [open, setOpen] = useState(true);
+  const {user} = useContext(AuthContext)
   const navigate = useNavigate();
 
   const Menus = [
@@ -59,10 +61,10 @@ const AdministratorSidebar = () => {
 
       {/* Profile Section */}
       <div className="border-t border-white pt-4 flex items-center gap-3 mt-auto">
-        <img src="./src/assets/png" className="w-10 h-10 rounded-md" />
+        <img src={user.profilePicture} className="w-10 h-10 rounded-md" />
         <div className={`flex flex-col ${!open && "hidden"} transition-all`}>
-          <h4 className="font-bold text-white">admin name</h4>
-          <span className="text-xs text-white">Admin Gmail</span>
+          <h4 className="font-bold text-white">{user.fullname}</h4>
+          <span className="text-xs text-white">{user.email}</span>
         </div>
       </div>
     </div>)

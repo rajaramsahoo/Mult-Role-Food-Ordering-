@@ -4,18 +4,11 @@ import { Routes, Route } from 'react-router-dom';
 import Home from "./pages/home/Home";
 import MainLayout from "./layout/MainLayout";
 import Restaurant from "./components/Restaurant";
-// import Offers from "./components/Offers";
-// import Profile from "./components/Profile";
+
 import VerifyEmail from "./pages/user/VerifyEmail";
-// import AdminDashboard from "./pages/admin/adminDashboard";
-// import Sidebar from "./components/Sidebar";
-// import Admin from "./pages/admin/Admin";
-// import RestaurantCard from "./components/RestaurantCard";
-// import Demo from "./pages/home/Demo";
+
 import Cart from "./components/Cart";
-// import Demo2 from "./components/Demo2";
-import Demo1 from "./components/Demo1";
-import AdminDashboard from "./pages/admin/AdminDashboard";
+
 import { useContext } from "react";
 import { AuthContext } from "./context/AuthProvider";
 import AdministratorRoutes from "./routes/AdministratorRoutes";
@@ -27,19 +20,24 @@ import AllUsers from "./components/AllUsers";
 import Orders from "./components/Orders";
 import RestaurantOwnerPrivateRoute from "./routes/RestaurantOwnerPrivateRoute";
 import ResturantOwnerDashboard from "./pages/resutrant/ResturantOwnerDashboard";
+import AddMenu from "./components/AddMenu";
+import Profile from "./components/Profile";
+import EditResturant from "./components/EditResturant";
+import SingleMenu from "./components/SingleMenu";
 function App() {
   const { user, setUser, loading, setLoading } = useContext(AuthContext)
-  console.log(user)
   return (
 
     <Routes>
-      {/* Wrap Home inside MainLayout */}
       <Route path="/" element={<MainLayout />}>
         <Route index element={<Home />} />
         <Route path="/restaurant" element={<Restaurant />} />
         <Route path="/menu" element={<Menu />} />
-        <Route path="/restaurant/single" element={<SingleRestaurant />} />
+        <Route path="/menu/:id" element={<SingleMenu />} />
+
+        <Route path="/restaurant/:id" element={<SingleRestaurant />} />
         <Route path="/cart" element={<Cart />} />
+        <Route path="/profile" element={<Profile />} />
 
       </Route>
       <Route element={<AdministratorRoutes user={user} />}>
@@ -47,10 +45,11 @@ function App() {
         <Route path="/admin/restaurant" element={<Restaurant />} />
         <Route path="/admin/menu" element={<Menu />} />
         <Route path="/admin/partner-with-us" element={<AddResturant />} />
+        <Route path="/admin/partner-with-us/:id" element={<SingleRestaurant />} />
         <Route path="/admin/partner" element={<AllUsers />} />
         <Route path="/admin/orders" element={<Orders />} />
-
-        {/* <Route path="/edit-menu" element={<EditMenu />} /> */}
+        <Route path="/admin/new-item" element={<AddMenu />} />
+        <Route path="/admin/edit-restaurant/:id" element={<EditResturant />} />
       </Route>
       <Route element={<RestaurantOwnerPrivateRoute user={user} />}>
         <Route path="/restaurant-owner-dashboard" element={<ResturantOwnerDashboard />} />
@@ -63,7 +62,6 @@ function App() {
       <Route path="/signup" element={<Signup />} />
       <Route path="/login" element={<Login />} />
       <Route path="/verify-email" element={<VerifyEmail />} />
-
     </Routes>
   )
 }

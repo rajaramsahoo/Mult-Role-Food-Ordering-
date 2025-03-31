@@ -6,9 +6,11 @@ import axios from "axios";
 import { Loader2 } from "lucide-react";
 import { AuthContext } from "@/context/AuthProvider";
 import { useNavigate } from "react-router-dom";
+import { ResContext } from "@/context/ResProvider";
 const AddRestaurant = () => {
     let token = JSON.parse(localStorage.getItem("token"))?.token || "";
     const { user, setUser, loading, setLoading } = useContext(AuthContext);
+    const {fetchRes} = useContext(ResContext)
     const navigate = useNavigate()
     const [input, setInput] = useState({
         restaurantName: "",
@@ -69,7 +71,7 @@ const AddRestaurant = () => {
             formData.append("city", input.city);
             formData.append("country", input.country);
             formData.append("deliveryTime", input.deliveryTime.toString());
-            formData.append("cuisines", JSON.stringify(input.cuisines));
+            formData.append("cuisines", [input.cuisines]);
             formData.append("image", input.imageFile);
 
             const response = await axios.post(
@@ -82,6 +84,7 @@ const AddRestaurant = () => {
                 }
             );
             console.log("✅ Restaurant added successfully:", response.data);
+            fetchRes()
             alert("Restaurant Added Successfully!");
             setLoading(true);
             setInput()
@@ -98,7 +101,7 @@ const AddRestaurant = () => {
     };
 
     return (
-        <div className="max-w-6xl mx-auto my-10">
+        <div className="max-w-6xl mx-10 my-10">
             <h1 className="font-extrabold text-2xl mb-5">Add Restaurant</h1>
             <form onSubmit={handleSubmit}>
                 <div className="md:grid grid-cols-2 gap-6 space-y-2 md:space-y-0">

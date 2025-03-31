@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { ChevronDown, EditIcon, Filter, MoveLeft, MoveLeftIcon, MoveRight, Plus, Search } from "lucide-react"
+import React, { useContext, useState } from 'react'
+import { ChevronDown, EditIcon, Filter, HeartIcon, MoveLeft, MoveLeftIcon, MoveRight, Plus, Search } from "lucide-react"
 import { Link } from 'react-router-dom'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -19,140 +19,16 @@ import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { MenuContext } from '@/context/MenuProvider'
+import { AuthContext } from '@/context/AuthProvider'
+import { CartContext } from '@/context/CartProvider'
+import SingleMenu from './SingleMenu'
 const Menu = () => {
+  const { menu } = useContext(MenuContext)
+  const { user } = useContext(AuthContext)
+  const { addToCart, fetchCartItems,cart } = useContext(CartContext)
+  console.log(cart)
   // Sample menu data
-  const foodItems = [
-    {
-      id: 1,
-      name: "Margherita Pizza",
-      restaurant: "Pizza Palace",
-      cuisine: "Italian",
-      isVeg: true,
-      price: 12.99,
-      rating: 4.5,
-      image: "https://images.unsplash.com/photo-1556745750-68295fefafc5?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    },
-    {
-      id: 2,
-      name: "Chicken Biryani",
-      restaurant: "Spice Garden",
-      cuisine: "Indian",
-      isVeg: false,
-      price: 14.99,
-      rating: 4.7,
-      image: "/placeholder.svg?height=200&width=200",
-    },
-    {
-      id: 3,
-      name: "Pad Thai",
-      restaurant: "Thai Delight",
-      cuisine: "Thai",
-      isVeg: true,
-      price: 11.99,
-      rating: 4.3,
-      image: "/placeholder.svg?height=200&width=200",
-    },
-    {
-      id: 4,
-      name: "Beef Burger",
-      restaurant: "Burger Joint",
-      cuisine: "American",
-      isVeg: false,
-      price: 9.99,
-      rating: 4.2,
-      image: "/placeholder.svg?height=200&width=200",
-    },
-    {
-      id: 5,
-      name: "Vegetable Sushi Roll",
-      restaurant: "Sushi Express",
-      cuisine: "Japanese",
-      isVeg: true,
-      price: 13.99,
-      rating: 4.6,
-      image: "https://images.unsplash.com/photo-1556745750-68295fefafc5?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    },
-    {
-      id: 6,
-      name: "Butter Chicken",
-      restaurant: "Spice Garden",
-      cuisine: "Indian",
-      isVeg: false,
-      price: 15.99,
-      rating: 4.8,
-      image: "/placeholder.svg?height=200&width=200",
-    },
-    {
-      id: 7,
-      name: "Butter Chicken",
-      restaurant: "Spice Garden",
-      cuisine: "Indian",
-      isVeg: false,
-      price: 15.99,
-      rating: 4.8,
-      image: "/placeholder.svg?height=200&width=200",
-    },
-    {
-      id: 8,
-      name: "Butter Chicken",
-      restaurant: "Spice Garden",
-      cuisine: "Indian",
-      isVeg: false,
-      price: 15.99,
-      rating: 4.8,
-      image: "/placeholder.svg?height=200&width=200",
-    },
-    {
-      id: 9,
-      name: "Butter Chicken",
-      restaurant: "Spice Garden",
-      cuisine: "Indian",
-      isVeg: false,
-      price: 15.99,
-      rating: 4.8,
-      image: "/placeholder.svg?height=200&width=200",
-    },
-    {
-      id: 10,
-      name: "Butter Chicken",
-      restaurant: "Spice Garden",
-      cuisine: "Indian",
-      isVeg: false,
-      price: 15.99,
-      rating: 4.8,
-      image: "/placeholder.svg?height=200&width=200",
-    },
-    {
-      id: 11,
-      name: "Butter Chicken",
-      restaurant: "Spice Garden",
-      cuisine: "Indian",
-      isVeg: false,
-      price: 15.99,
-      rating: 4.8,
-      image: "/placeholder.svg?height=200&width=200",
-    },
-    {
-      id: 12,
-      name: "Butter Chicken",
-      restaurant: "Spice Garden",
-      cuisine: "Indian",
-      isVeg: false,
-      price: 15.99,
-      rating: 4.8,
-      image: "/placeholder.svg?height=200&width=200",
-    },
-    {
-      id: 13,
-      name: "Butter Chicken",
-      restaurant: "Spice Garden",
-      cuisine: "Indian",
-      isVeg: false,
-      price: 15.99,
-      rating: 4.8,
-      image: "/placeholder.svg?height=200&width=200",
-    },
-  ]
 
   const cuisines = ["All", "Italian", "Indian", "Thai", "American", "Japanese", "Chinese", "Mexican"]
   const [activeTab, setActiveTab] = useState("all")
@@ -161,17 +37,17 @@ const Menu = () => {
   const [dietFilter, setDietFilter] = useState("all")
   const [sortOrder, setSortOrder] = useState("popularity")
 
-  const filteredItems = foodItems.filter((item) => {
+  const filteredItems = menu.filter((item) => {
     if (searchQuery && !item.name.toLowerCase().includes(searchQuery.toLowerCase())) {
       return false
     }
-    if (selectedCuisine !== "All" && item.cuisine !== selectedCuisine) {
+    if (selectedCuisine !== "All" && item.cusine !== selectedCuisine) {
       return false
     }
-    if (dietFilter === "veg" && !item.isVeg) {
+    if (dietFilter === "veg" && !item.vegNonVeg) {
       return false
     }
-    if (dietFilter === "nonveg" && item.isVeg) {
+    if (dietFilter === "nonveg" && item.vegNonVeg) {
       return false
     }
     return true
@@ -205,16 +81,46 @@ const Menu = () => {
       setCurrentPage(page);
     }
   };
+
+  const handleAddToCart = async (item) => {
+    try {
+      if (user && user?.email) {
+        const cartItem = {
+          menuItemId: item._id,
+          name: item.name,
+          quantity: 1,
+          image: item.image,
+          price: item.price,
+          email: user.email,
+        };
+
+        await addToCart(cartItem, user.email);
+        const res = await fetchCartItems(user.email);
+        console.log(res)
+      } else {
+        navigate("/login", { state: { from: location } });
+        return;
+      }
+    } catch (error) {
+      console.error("Error adding item to cart:", error);
+    }
+  };
+
+  const [open, setOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
+
+  const handleOpenModal = (e, menuItem) => {
+    e.preventDefault();
+    setSelectedItem(menuItem);
+    setOpen(true);
+  };
   return (
     <div className="container px-4 py-6 sm:px-6 lg:p-6 ">
       <div className="flex flex-col gap-6">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <h1 className="text-2xl font-bold">Explore Menu</h1>
           <div className="flex items-center gap-2 w-full sm:w-auto">
-            <Button className="bg-orange text-white hover:bg-amber-100 hover:text-orange">
-              <Plus /> Add Menu
 
-            </Button>
             <div className="relative w-full sm:w-[300px]">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
@@ -429,42 +335,59 @@ const Menu = () => {
           </div>
 
           <TabsContent value="all" className="mt-0">
-            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 z-0">
               {paginatedItems.map((item) => (
-                <Link to={`/restaurants/${item.id}`} key={item.id} className="group">
-                  <Card className="overflow-hidden">
-                    <div className="relative">
-                      <img
-                        src={item.image || "/placeholder.svg"}
-                        alt={item.name}
-                        className="w-full h-48 object-cover rounded-t-xl"
-                      />
 
-                      <Badge className="absolute top-2 right-2 bg-white text-black">★ {item.rating}</Badge>
-                      <Badge className={`absolute top-2 left-2 ${item.isVeg ? "bg-green-500" : "bg-red-500"}`}>
-                        {item.isVeg ? "Veg" : "Non-Veg"}
-                      </Badge>
-                      <Badge className="absolute bottom-2 right-2 bg-white text-black">
-                        <EditIcon size={16} />
-                      </Badge>
 
+
+                <Card className="overflow-hidden rounded-xl" key={item._id}>
+                  <div className="relative" onClick={(e) => handleOpenModal(e, item)}>
+                    <img
+                      src={item.image || "/placeholder.svg"}
+                      alt={item.name}
+                      className="w-full h-48 object-cover rounded-t-xl"
+                    />
+
+                    <Badge className={`absolute top-2 left-2 text-white ${item.vegNonVeg === "veg" ? "bg-green-500" : "bg-red-500"}`}>
+                      {item.vegNonVeg}
+                    </Badge>
+                    <span className="absolute top-2 right-2 bg-white p-1 rounded-full shadow">
+                      <HeartIcon size={16} />
+                    </span>
+                    {user?.role === "admin" && <Badge className="absolute bottom-2 right-2 bg-white text-black z-999">
+
+                      <EditIcon size={16} />
+                    </Badge>}
+
+
+                  </div>
+                  <SingleMenu item={selectedItem} isOpen={open} onClose={() => setOpen(false)} />
+                  <CardContent className="p-3">
+                    {/* Heading and Price aligned properly */}
+                    <div className="flex justify-between items-center">
+                      <h6 className="font-semibold group-hover:text-primary transition-colors text-left">
+                        {item.name}
+                      </h6>
+                      <Badge className="bg-white text-black">{item.price}</Badge>
                     </div>
-                    <CardContent className="pl-1">
-                      <h3 className="font-semibold text-nowrap group-hover:text-primary transition-colors">{item.name}</h3>
-                      <div className="flex justify-between items-center mt-1">
-                        <p className="text-sm text-muted-foreground">{item.restaurant}</p>
-                        <p className="font-medium">${item.price}</p>
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-1">{item.cuisine}</p>
-                      <div className="flex justify-between items-center mt-1">
 
+                    <p className="text-[12px] text-muted-foreground min-h-[40px] overflow-hidden line-clamp-2">
+                      {item.description}
+                    </p>
 
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
+                    {/* Cuisine on the left, Button on the right */}
+                    <div className="flex justify-between items-center mt-2">
+                      <p className="text-xs text-muted-foreground truncate">{item.cusine}</p>
+                      <Button className="text-[10px] px-3 py-1 rounded-full h-8 z-999" onClick={() => handleAddToCart(item, user.email)}>Add to Cart</Button>
+                    </div>
+                  </CardContent>
+                </Card>
               ))}
             </div>
+
+
+
+
             {paginatedItems.length === 0 && (
               <div className="text-center py-12">
                 <h3 className="text-lg font-medium">No items found</h3>

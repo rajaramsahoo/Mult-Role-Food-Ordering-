@@ -22,7 +22,7 @@ export const isAuthenticated = (req, res, next) => {
         // Verify the token
         const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
         req.payload = decoded.user;
-        console.log(req.payload._id)
+        // console.log(req.payload._id)
         next();
     } catch (error) {
         console.error(error);

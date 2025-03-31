@@ -42,11 +42,11 @@ import {
 import { Separator } from '@radix-ui/react-separator';
 import { Input } from './ui/input';
 import { AuthContext } from '@/context/AuthProvider';
+import { CartContext } from '@/context/CartProvider';
 const Navbar = () => {
   const { user, setUser, loading, setLoading } = useContext(AuthContext)
-  console.log(user?.role)
-  // const loading = false
-  const cart = 1
+  const { cart } = useContext(CartContext)
+
   const navigate = useNavigate()
   const handleLogout = () => {
     localStorage.removeItem("user")
@@ -60,7 +60,16 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-0">
         <div className="flex items-center justify-between h-14 ">
           <div className="">  <Link to="/">
-            <h1 className="font-bold md:font-extrabold md:text-2xl sm:text-xs">Ghar ka Khana</h1>
+            <h1 className="flex items-center gap-0 ">
+              <img src="/images/home/logo.png" className="w-10 md:w-14" alt="Logo" />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-orange font-extrabold text-xl md:text-3xl tracking-wide italic drop-shadow-lg">
+                Ghar ka <span className="font-serif">Khana</span>
+              </span>
+            </h1>
+
+
+
+
           </Link></div>
 
           <div className="hidden md:flex items-center gap-6">
@@ -116,9 +125,9 @@ const Navbar = () => {
             </DropdownMenu>
             <Link to="/cart" className="relative">
               <ShoppingCart />
-              {cart > 0 && (
+              {cart.length > 0 && (
                 <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
-                  {cart}
+                  {cart?.length}
                 </span>
               )}
             </Link>

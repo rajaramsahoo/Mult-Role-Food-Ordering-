@@ -1,6 +1,8 @@
-import React, { useState } from 'react'
-import { ChevronDown, EditIcon, Filter, MoveLeft, MoveLeftIcon, MoveRight, Plus, Search } from "lucide-react"
-import { Link, useNavigate } from 'react-router-dom'
+"use client"
+
+import { useContext, useState } from "react"
+import { ChevronDown, EditIcon, Filter, MoveLeft, Plus, MoveRight, Search } from "lucide-react"
+import { Link, useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import {
@@ -13,150 +15,19 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { use } from 'react'
-import axios from 'axios'
-
+import { ResContext } from "@/context/ResProvider"
+import EditResturant from "./EditResturant"
+import { AuthContext } from "@/context/AuthProvider"
 const Restaurant = () => {
-  let token = JSON.parse(localStorage.getItem("token"))?.token || "";
-
-  const foodItems = [
-    {
-      id: 1,
-      name: "Margherita Pizza",
-      restaurant: "Pizza Palace",
-      cuisine: "Italian",
-      isVeg: true,
-      price: 12.99,
-      rating: 4.5,
-      image: "https://images.unsplash.com/photo-1556745750-68295fefafc5?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    },
-    {
-      id: 2,
-      name: "Chicken Biryani",
-      restaurant: "Spice Garden",
-      cuisine: "Indian",
-      isVeg: false,
-      price: 14.99,
-      rating: 4.7,
-      image: "/placeholder.svg?height=200&width=200",
-    },
-    {
-      id: 3,
-      name: "Pad Thai",
-      restaurant: "Thai Delight",
-      cuisine: "Thai",
-      isVeg: true,
-      price: 11.99,
-      rating: 4.3,
-      image: "/placeholder.svg?height=200&width=200",
-    },
-    {
-      id: 4,
-      name: "Beef Burger",
-      restaurant: "Burger Joint",
-      cuisine: "American",
-      isVeg: false,
-      price: 9.99,
-      rating: 4.2,
-      image: "/placeholder.svg?height=200&width=200",
-    },
-    {
-      id: 5,
-      name: "Vegetable Sushi Roll",
-      restaurant: "Sushi Express",
-      cuisine: "Japanese",
-      isVeg: true,
-      price: 13.99,
-      rating: 4.6,
-      image: "https://images.unsplash.com/photo-1556745750-68295fefafc5?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    },
-    {
-      id: 6,
-      name: "Butter Chicken",
-      restaurant: "Spice Garden",
-      cuisine: "Indian",
-      isVeg: false,
-      price: 15.99,
-      rating: 4.8,
-      image: "/placeholder.svg?height=200&width=200",
-    },
-    {
-      id: 7,
-      name: "Butter Chicken",
-      restaurant: "Spice Garden",
-      cuisine: "Indian",
-      isVeg: false,
-      price: 15.99,
-      rating: 4.8,
-      image: "/placeholder.svg?height=200&width=200",
-    },
-    {
-      id: 8,
-      name: "Butter Chicken",
-      restaurant: "Spice Garden",
-      cuisine: "Indian",
-      isVeg: false,
-      price: 15.99,
-      rating: 4.8,
-      image: "/placeholder.svg?height=200&width=200",
-    },
-    {
-      id: 9,
-      name: "Butter Chicken",
-      restaurant: "Spice Garden",
-      cuisine: "Indian",
-      isVeg: false,
-      price: 15.99,
-      rating: 4.8,
-      image: "/placeholder.svg?height=200&width=200",
-    },
-    {
-      id: 10,
-      name: "Butter Chicken",
-      restaurant: "Spice Garden",
-      cuisine: "Indian",
-      isVeg: false,
-      price: 15.99,
-      rating: 4.8,
-      image: "/placeholder.svg?height=200&width=200",
-    },
-    {
-      id: 11,
-      name: "Butter Chicken",
-      restaurant: "Spice Garden",
-      cuisine: "Indian",
-      isVeg: false,
-      price: 15.99,
-      rating: 4.8,
-      image: "/placeholder.svg?height=200&width=200",
-    },
-    {
-      id: 12,
-      name: "Butter Chicken",
-      restaurant: "Spice Garden",
-      cuisine: "Indian",
-      isVeg: false,
-      price: 15.99,
-      rating: 4.8,
-      image: "/placeholder.svg?height=200&width=200",
-    },
-    {
-      id: 13,
-      name: "Butter Chicken",
-      restaurant: "Spice Garden",
-      cuisine: "Indian",
-      isVeg: false,
-      price: 15.99,
-      rating: 4.8,
-      image: "/placeholder.svg?height=200&width=200",
-    },
-  ]
+  const { restaurant } = useContext(ResContext)
+  const { user } = useContext(AuthContext)
+  console.log(user.role)
 
   const cuisines = ["All", "Italian", "Indian", "Thai", "American", "Japanese", "Chinese", "Mexican"]
   const [activeTab, setActiveTab] = useState("all")
@@ -165,12 +36,20 @@ const Restaurant = () => {
   const [dietFilter, setDietFilter] = useState("all")
   const [sortOrder, setSortOrder] = useState("popularity")
 
-  const filteredItems = foodItems.filter((item) => {
+  const filteredItems = restaurant.filter((item) => {
     if (searchQuery && !item.name.toLowerCase().includes(searchQuery.toLowerCase())) {
       return false
     }
-    if (selectedCuisine !== "All" && item.cuisine !== selectedCuisine) {
-      return false
+    if (selectedCuisine !== "All") {
+      try {
+        const cuisinesArray = Array.isArray(item.cuisines) ? item.cuisines[0] : item.cuisines
+        const parsedCuisines = JSON.parse(cuisinesArray)
+        if (!parsedCuisines.includes(selectedCuisine)) {
+          return false
+        }
+      } catch (error) {
+        return false
+      }
     }
     if (dietFilter === "veg" && !item.isVeg) {
       return false
@@ -193,56 +72,41 @@ const Restaurant = () => {
     }
     return b.rating - a.rating
   })
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 6; // Number of items per page
+
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 6 // Number of items per page
 
   // Calculate total pages
-  const totalPages = Math.ceil(sortedItems.length / itemsPerPage);
+  const totalPages = Math.ceil(sortedItems.length / itemsPerPage)
 
   // Get paginated items
-  const paginatedItems = sortedItems.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  const paginatedItems = sortedItems.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+
   const handlePageChange = (page) => {
     if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-    }
-  };
-  const navigate = useNavigate();
-
-  const handleGetRestaurants = async () => {
-    try {
-      const response = await axios.get(`${import.meta.env.VITE_BASEURL}/resturant`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      console.log(response.data);
-    } catch (error) {
-      console.error(error);
-
+      setCurrentPage(page)
     }
   }
-  handleGetRestaurants()
+
+  const navigate = useNavigate()
+
   return (
     <div className="container px-4 py-6 sm:px-6 lg:px-8 ">
       <div className="flex flex-col gap-6">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <h1 className="text-2xl font-bold">Explore Restaurant</h1>
           <div className="flex items-center gap-2 w-full sm:w-auto">
-            <Button className="bg-orange text-white hover:bg-amber-100 hover:text-orange"
-              onClick={() => navigate("/admin/partner-with-us")}>
-              <Plus /> Add Restaurant
+            {user.role !== "user" && (
+              <Button
+                className="bg-orange text-white hover:bg-amber-100 hover:text-orange"
+                onClick={() => navigate("/admin/partner-with-us")}
+              >
+                <Plus /> Add Restaurant
+              </Button>
+            )}
 
-            </Button>
             <div className="relative w-full sm:w-[300px]">
-
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-
               <Input
                 type="search"
                 placeholder="Search for food..."
@@ -372,16 +236,10 @@ const Restaurant = () => {
                 >
                   Popularity
                 </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => setSortOrder("a-z")}
-                  className={sortOrder === "a-z" ? "bg-muted" : ""}
-                >
+                <DropdownMenuItem onClick={() => setSortOrder("a-z")} className={sortOrder === "a-z" ? "bg-muted" : ""}>
                   Name (A-Z)
                 </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => setSortOrder("z-a")}
-                  className={sortOrder === "z-a" ? "bg-muted" : ""}
-                >
+                <DropdownMenuItem onClick={() => setSortOrder("z-a")} className={sortOrder === "z-a" ? "bg-muted" : ""}>
                   Name (Z-A)
                 </DropdownMenuItem>
                 <DropdownMenuItem
@@ -433,7 +291,7 @@ const Restaurant = () => {
               </Badge>
             )}
             {sortOrder !== "popularity" && (
-              <Badge variant="outline" className="flex items-центer gap-1">
+              <Badge variant="outline" className="flex items-center gap-1">
                 Sort:{" "}
                 {sortOrder === "a-z"
                   ? "A-Z"
@@ -455,41 +313,43 @@ const Restaurant = () => {
           </div>
 
           <TabsContent value="all" className="mt-0">
-            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2">
               {paginatedItems.map((item) => (
-                <Link to={`/restaurants/${item.id}`} key={item.id} className="group">
-                  <Card className="overflow-hidden">
+                <Link
+                to={user.role === "user" ? `/restaurant/${item._id}` : `/admin/partner-with-us/${item._id}`}
+                  state={{ restaurant: item }}
+                  key={item._id}
+                  className="group"
+                >
+                  <Card className="overflow-hidden ">
                     <div className="relative">
                       <img
-                        src={item.image || "/placeholder.svg"}
+                        src={item.imageUrl || "/placeholder.svg"}
                         alt={item.name}
                         className="w-full h-48 object-cover rounded-t-xl"
                       />
 
                       <Badge className="absolute top-2 right-2 bg-white text-black">★ {item.rating}</Badge>
-                      <Badge className={`absolute top-2 left-2 ${item.isVeg ? "bg-green-500" : "bg-red-500"}`}>
-                        {item.isVeg ? "Veg" : "Non-Veg"}
-                      </Badge>
-                      <Badge className="absolute bottom-2 right-2 bg-white text-black">
-                        <EditIcon size={16} />
-                      </Badge>
 
                     </div>
-                    <CardContent className="pl-1">
-                      <h3 className="font-semibold text-nowrap group-hover:text-primary transition-colors">{item.name}</h3>
+                    <CardContent className="pl-1 h-20 pt-2 pb-2">
+                      {" "}
+                      {/* Fixed height */}
+                      <h3 className="font-semibold text-nowrap group-hover:text-primary transition-colors truncate">
+                        {item.name}
+                      </h3>
                       <div className="flex justify-between items-center mt-1">
-                        <p className="text-sm text-muted-foreground">{item.restaurant}</p>
-                        <p className="font-medium">${item.price}</p>
+                        <p className="text-sm text-muted-foreground truncate max-w-[70%]">{item.restaurantName}</p>
                       </div>
-                      <p className="text-xs text-muted-foreground mt-1">{item.cuisine}</p>
-                      <div className="flex justify-between items-center mt-1">
-
-
-                      </div>
+                      <p className="text-xs text-muted-foreground mt-1 line-clamp-2 overflow-hidden">
+                        {item.cuisines}
+                      </p>
                     </CardContent>
                   </Card>
                 </Link>
+
               ))}
+
             </div>
             {paginatedItems.length === 0 && (
               <div className="text-center py-12">
@@ -498,24 +358,19 @@ const Restaurant = () => {
               </div>
             )}
             <div className="flex justify-center items-center mt-6 gap-2">
-              {
-                currentPage > 1 &&
+              {currentPage > 1 && (
                 <Button
                   className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 text-black"
                   onClick={() => handlePageChange(currentPage - 1)}
-
                 >
                   <MoveLeft />
                 </Button>
-              }
+              )}
 
               {Array.from({ length: totalPages }, (_, index) => (
                 <Button
                   key={index}
-                  className={`px-4 py-2 rounded ${currentPage === index + 1
-                    ? "bg-orange text-black"
-                    : "bg-gray-200"
-                    }`}
+                  className={`px-4 py-2 rounded ${currentPage === index + 1 ? "bg-orange text-black" : "bg-gray-200"}`}
                   onClick={() => handlePageChange(index + 1)}
                 >
                   {index + 1}
@@ -527,7 +382,8 @@ const Restaurant = () => {
                   onClick={() => handlePageChange(currentPage + 1)}
                 >
                   <MoveRight />
-                </Button>)}
+                </Button>
+              )}
             </div>
           </TabsContent>
 
@@ -558,10 +414,13 @@ const Restaurant = () => {
               <p className="text-muted-foreground mt-1">This tab would show items with quick delivery</p>
             </div>
           </TabsContent>
+
         </Tabs>
+
       </div>
     </div>
   )
 }
 
 export default Restaurant
+

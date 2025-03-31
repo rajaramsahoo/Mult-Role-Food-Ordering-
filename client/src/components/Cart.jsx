@@ -10,69 +10,84 @@ import {
   TableHeader,
   TableRow,
 } from "./ui/table";
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
+import { CartContext } from "@/context/CartProvider";
+import { AuthContext } from "@/context/AuthProvider";
+import axios from "axios";
 // import CheckoutConfirmPage from "./CheckoutConfirmPage";
 
-const demoCart = [
-  {
-    _id: "1",
-    name: "Product 1",
-    price: 50,
-    quantity: 2,
-    image: "https://via.placeholder.com/50",
-  },
-  {
-    _id: "2",
-    name: "Product 2",
-    price: 30,
-    quantity: 1,
-    image: "https://via.placeholder.com/50",
-  },
-];
+
 
 const Cart = () => {
-  const [cart, setCart] = useState(demoCart);
+  const { cart, fetchCartItems, removeFromCart } = useContext(CartContext)
+  const { user } = useContext(AuthContext)
+  console.log(cart)
   const [open, setOpen] = useState(false);
+  useEffect(() => {
+    if (user?.email) {
+      fetchCartItems(user.email);
 
-  const incrementQuantity = (id) => {
-    setCart((prevCart) =>
-      prevCart.map((item) =>
-        item._id === id ? { ...item, quantity: item.quantity + 1 } : item
-      )
-    );
+    }
+  }, [user?.email]);
+
+  const handleDelete = async (item) => {
+    try {
+      await removeFromCart(item, user?.email);
+      await fetchCartItems(user?.email);
+      window.alert("Item removed");
+    } catch (error) {
+      console.error("Failed to remove item:", error);
+      window.alert("Failed to remove item");
+    }
   };
+  const handleIncrease = async (item) => {
+    try {
+      await axios.put(
+        `${import.meta.env.VITE_BASEURL}/carts/update/${item._id}`,
+        {
+          quantity: item.quantity + 1,
+        }
+      );
 
-  const decrementQuantity = (id) => {
-    setCart((prevCart) =>
-      prevCart.map((item) =>
-        item._id === id && item.quantity > 1
-          ? { ...item, quantity: item.quantity - 1 }
-          : item
-      )
-    );
-  };
+      await fetchCartItems(user?.email);
 
-  const removeItem = (id) => {
-    setCart((prevCart) => prevCart.filter((item) => item._id !== id));
-  };
 
-  const clearCart = () => {
-    setCart([]);
-  };
+    } catch (error) {
+      console.log(error)
+    }
+  }
+  const handleDecrease = async (item) => {
 
-  let totalAmount = cart.reduce((acc, ele) => acc + ele.price * ele.quantity, 0);
+    try {
+      await axios.put(
+        `${import.meta.env.VITE_BASEURL}/carts/update/${item._id}`,
+        {
+          quantity: item.quantity - 1,
+        }
+      );
+      await fetchCartItems(user?.email);
+    } catch (error) {
+      console.error("Error updating quantity:", error);
+    }
+
+  }
+  const orderTotal = cart.reduce((total, item) => {
+    return total + item.price * item.quantity;;
+  }, 0);
 
   return (
     <div className="m-4 sm:m-10 md:m-20">
       <div className="flex justify-end mb-4">
-        <Button variant="link" onClick={clearCart} className="text-sm sm:text-base">
+        <Button variant="link"
+          //  onClick={clearCart}
+          className="text-sm sm:text-base">
           Clear All
         </Button>
       </div>
 
       {/* Mobile View: Stack items as cards */}
       <div className="block md:hidden space-y-4">
-        {cart.map((item) => (
+        {cart?.map((item) => (
           <div key={item._id} className="border rounded-lg p-4 flex flex-col gap-3">
             <div className="flex items-center gap-3">
               <Avatar className="w-12 h-12">
@@ -87,7 +102,7 @@ const Cart = () => {
             <div className="flex items-center justify-between">
               <div className="flex items-center rounded-full border border-gray-100 dark:border-gray-800 shadow-md">
                 <Button
-                  onClick={() => decrementQuantity(item._id)}
+                  //onClick={() => decrementQuantity(item._id)}
                   size="icon"
                   variant="outline"
                   className="rounded-full bg-gray-200 h-8 w-8"
@@ -103,7 +118,7 @@ const Cart = () => {
                   {item.quantity}
                 </Button>
                 <Button
-                  onClick={() => incrementQuantity(item._id)}
+                  // onClick={() => incrementQuantity(item._id)}
                   size="icon"
                   className="rounded-full bg-orange hover:bg-hoverOrange h-8 w-8"
                   variant="outline"
@@ -116,7 +131,7 @@ const Cart = () => {
             <Button
               size="sm"
               className="bg-orange hover:bg-hoverOrange w-full"
-              onClick={() => removeItem(item._id)}
+              onClick={() => handleDelete(item._id)}
             >
               Remove
             </Button>
@@ -151,10 +166,11 @@ const Cart = () => {
                 <TableCell>
                   <div className="w-fit flex items-center rounded-full border border-gray-100 dark:border-gray-800 shadow-md">
                     <Button
-                      onClick={() => decrementQuantity(item._id)}
+                      onClick={() => handleDecrease(item)}
                       size="icon"
                       variant="outline"
                       className="rounded-full bg-gray-200"
+                      disabled={item.quantity === 1}
                     >
                       <Minus />
                     </Button>
@@ -167,7 +183,7 @@ const Cart = () => {
                       {item.quantity}
                     </Button>
                     <Button
-                      onClick={() => incrementQuantity(item._id)}
+                      onClick={() => handleIncrease(item)}
                       size="icon"
                       className="rounded-full bg-orange hover:bg-hoverOrange"
                       variant="outline"
@@ -176,12 +192,12 @@ const Cart = () => {
                     </Button>
                   </div>
                 </TableCell>
-                <TableCell>${item.price * item.quantity}</TableCell>
+                <TableCell> ₹{item.price * item.quantity}</TableCell>
                 <TableCell className="text-right">
                   <Button
                     size="sm"
                     className="bg-orange hover:bg-hoverOrange"
-                    onClick={() => removeItem(item._id)}
+                    onClick={() => handleDelete(item._id)}
                   >
                     Remove
                   </Button>
@@ -192,7 +208,7 @@ const Cart = () => {
           <TableFooter>
             <TableRow className="text-xl md:text-2xl font-bold">
               <TableCell colSpan={5}>Total</TableCell>
-              <TableCell className="text-right">${totalAmount}</TableCell>
+              <TableCell className="text-right"> ₹{orderTotal}</TableCell>
             </TableRow>
           </TableFooter>
         </Table>

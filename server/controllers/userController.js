@@ -76,7 +76,7 @@ export const login = async (req, res) => {
 }
 export const verifyEmail = async (req, res) => {
     try {
-        const { verificationToken  } = req.body;
+        const { verificationToken } = req.body;
 
         const user = await userModel.findOne({ verificationToken }).select("-password");
         console.log(user)
@@ -219,3 +219,30 @@ export const logout = async (req, res) => {
 //         return res.status(500).json({ message: "Internal server error" });
 //     }
 // }
+
+export const getAllUsers = async (req, res) => {
+    try {
+        const users = await userModel.find().select("-password");
+        return res.status(200).json({ success: true, users })
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+}
+
+export const getUserById = async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const user = await userModel.findById(userId).select("-password");
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "No such user exists"
+            });
+        }
+        return res.status(200).json({ success: true, user });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+}

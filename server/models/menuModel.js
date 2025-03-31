@@ -24,6 +24,8 @@ const menuSchema = new mongoose.Schema({
     enum: ["Starter", "Main Course", "Dessert", "Beverage"],
     required: true,
   },
+  cusine: { type: String, required: true },
+  isAvailable: { type: Boolean, default: true },
 }, { timestamps: true });
 
-export const Menu = mongoose.model("menumodel", menuSchema);
+export default mongoose.model("menuModel", menuSchema);
