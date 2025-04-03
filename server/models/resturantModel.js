@@ -4,7 +4,7 @@ const restaurantSchema = new mongoose.Schema(
     {
         owner: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "userModal", // Ensure the correct model reference
+            ref: "userModel", // Ensure the correct model reference
             required: true,
             index: true, // Optimized indexing for faster queries
         },
@@ -18,7 +18,7 @@ const restaurantSchema = new mongoose.Schema(
             type: String,
             required: true,
             trim: true,
-            index: true, // Index for search performance
+            index: true,
         },
         country: {
             type: String,
@@ -29,14 +29,13 @@ const restaurantSchema = new mongoose.Schema(
         deliveryTime: {
             type: Number,
             required: true,
-            min: 5, // Ensures delivery time is reasonable
+            min: 5,
         },
         cuisines: [
             {
                 type: String,
                 required: true,
                 trim: true,
-           
             },
         ],
         menus: [
@@ -48,10 +47,30 @@ const restaurantSchema = new mongoose.Schema(
         ],
         imageUrl: {
             type: String,
-
         },
         status: { type: String, enum: ["pending", "approved", "rejected"], default: "pending" },
-        rating: Number,
+
+        openingTime: {
+            type: String,
+            required: true,
+            validate: {
+                validator: function (value) {
+                    return /^([01]\d|2[0-3]):([0-5]\d)$/.test(value); // Ensures HH:mm format
+                },
+                message: "Invalid time format. Use HH:mm (24-hour format)",
+            },
+        },
+        closingTime: {
+            type: String,
+            required: true,
+            validate: {
+                validator: function (value) {
+                    return /^([01]\d|2[0-3]):([0-5]\d)$/.test(value); // Ensures HH:mm format
+                },
+                message: "Invalid time format. Use HH:mm (24-hour format)",
+            },
+        },
+
     },
     { timestamps: true }
 );

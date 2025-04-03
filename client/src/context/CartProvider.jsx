@@ -29,9 +29,10 @@ export const CartProvider = ({ children, userEmail }) => {
             const res = await axios.post(`${import.meta.env.VITE_BASEURL}/carts`, item)
             await fetchCartItems(email)
             setCart(res.data.cartItem)
-            console.log(res.data.cartItem)
+            window.alert(res.data.message)
         } catch (error) {
             console.log(error)
+            window.alert(error.response.data.message)
         }
     }
     const removeFromCart = async (itemId, email) => {
@@ -51,6 +52,23 @@ export const CartProvider = ({ children, userEmail }) => {
             throw error; // Ensure the error propagates
         }
     };
+
+    const removeAllCart = async (email) => {
+        try {
+            const res = await axios.delete(
+                `${import.meta.env.VITE_BASEURL}/carts/clear/${email}`
+            );
+            if (res.status !== 200) {
+                throw new Error("Failed to delete All item");
+            }
+
+            console.log(res);
+            await fetchCartItems(email);
+        } catch (error) {
+            console.error("Error All removing item from cart:", error);
+            throw error; // Ensure the error propagates
+        }
+    }
 
     const updateCartItem = (itemId, updatedItem) => {
         setCart((prevCart) =>
@@ -73,6 +91,7 @@ export const CartProvider = ({ children, userEmail }) => {
                 addToCart,
                 removeFromCart,
                 updateCartItem,
+                removeAllCart
             }}
         >
             {children}

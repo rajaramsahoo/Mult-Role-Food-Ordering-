@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-
+import addressSchema from "./addressModel.js"
 const userSchema = new mongoose.Schema(
     {
         fullname: {
@@ -19,8 +19,15 @@ const userSchema = new mongoose.Schema(
             required: true
         },
         address: {
-            type: String,
-            default: "Update your address"
+            type: [addressSchema],
+            default: [],
+            validate: {
+                validator: (addresses) => {
+                    // Ensure no more than 3 addresses
+                    return addresses.length <= 3
+                },
+                message: "You can have a maximum of 3 addresses",
+            },
         },
         city: {
             type: String,

@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { ChevronDown, EditIcon, Filter, HeartIcon, MoveLeft, MoveLeftIcon, MoveRight, Plus, Search } from "lucide-react"
 import { Link } from 'react-router-dom'
 import { Button } from "@/components/ui/button"
@@ -19,16 +19,32 @@ import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+
+import SingleMenu from './SingleMenu'
 import { MenuContext } from '@/context/MenuProvider'
 import { AuthContext } from '@/context/AuthProvider'
 import { CartContext } from '@/context/CartProvider'
-import SingleMenu from './SingleMenu'
+import axios from 'axios'
 const Menu = () => {
-  const { menu } = useContext(MenuContext)
+
+
+
+
+  const { menu, fetchMenu, getResturantMenu } = useContext(MenuContext)
   const { user } = useContext(AuthContext)
-  const { addToCart, fetchCartItems,cart } = useContext(CartContext)
-  console.log(cart)
+  const { addToCart, fetchCartItems, cart, } = useContext(CartContext)
+  console.log(menu)
   // Sample menu data
+  useEffect(() => {
+    if (user?.role == "restaurantOwner") {
+      getResturantMenu()
+    }
+    else {
+      fetchMenu();
+    }
+  }, [user]);
+
+
 
   const cuisines = ["All", "Italian", "Indian", "Thai", "American", "Japanese", "Chinese", "Mexican"]
   const [activeTab, setActiveTab] = useState("all")
@@ -103,6 +119,7 @@ const Menu = () => {
       }
     } catch (error) {
       console.error("Error adding item to cart:", error);
+      window.alert(error)
     }
   };
 
@@ -114,6 +131,38 @@ const Menu = () => {
     setSelectedItem(menuItem);
     setOpen(true);
   };
+
+  const BadgeComponent = ({ restaurantId }) => {
+    const [restaurantName, setRestaurantName] = useState("");
+
+    useEffect(() => {
+      const fetchResturantName = async (id) => {
+        let token = JSON.parse(localStorage.getItem("token"))?.token || "";
+
+        try {
+          const res = await axios.get(`${import.meta.env.VITE_BASEURL}/resturant/${id}`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          setRestaurantName(res.data.restaurant.restaurantName);
+        } catch (error) {
+          console.error("Error fetching restaurant name", error);
+        }
+      };
+
+      if (restaurantId) {
+        fetchResturantName(restaurantId);
+      }
+    }, [restaurantId]);
+
+    return (
+      <span className="absolute -bottom-3 left-0 w-full text-center text-white text-sm px-2 py-0.5 rounded-full shadow bg-orange">
+      {restaurantName}
+    </span>
+    );
+  };
+
   return (
     <div className="container px-4 py-6 sm:px-6 lg:p-6 ">
       <div className="flex flex-col gap-6">
@@ -359,17 +408,18 @@ const Menu = () => {
                       <EditIcon size={16} />
                     </Badge>}
 
-
+                    <BadgeComponent restaurantId={item.restaurant} />
                   </div>
                   <SingleMenu item={selectedItem} isOpen={open} onClose={() => setOpen(false)} />
                   <CardContent className="p-3">
                     {/* Heading and Price aligned properly */}
                     <div className="flex justify-between items-center">
-                      <h6 className="font-semibold group-hover:text-primary transition-colors text-left">
+                      <h6 className="text-sm font-semibold group-hover:text-primary transition-colors text-left">
                         {item.name}
                       </h6>
                       <Badge className="bg-white text-black">{item.price}</Badge>
                     </div>
+
 
                     <p className="text-[12px] text-muted-foreground min-h-[40px] overflow-hidden line-clamp-2">
                       {item.description}

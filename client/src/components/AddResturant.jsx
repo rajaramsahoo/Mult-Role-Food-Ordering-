@@ -10,7 +10,7 @@ import { ResContext } from "@/context/ResProvider";
 const AddRestaurant = () => {
     let token = JSON.parse(localStorage.getItem("token"))?.token || "";
     const { user, setUser, loading, setLoading } = useContext(AuthContext);
-    const {fetchRes} = useContext(ResContext)
+    const { fetchRes } = useContext(ResContext)
     const navigate = useNavigate()
     const [input, setInput] = useState({
         restaurantName: "",
@@ -19,6 +19,8 @@ const AddRestaurant = () => {
         deliveryTime: "",
         cuisines: [], // Stores selected cuisines
         imageFile: null,
+        openingTime: "",
+        closingTime: ""
     });
     const [showDropdown, setShowDropdown] = useState(false);
     const cuisinesList = ["Indian",
@@ -73,6 +75,8 @@ const AddRestaurant = () => {
             formData.append("deliveryTime", input.deliveryTime.toString());
             formData.append("cuisines", [input.cuisines]);
             formData.append("image", input.imageFile);
+            formData.append("openingTime", input.openingTime)
+            formData.append("closingTime", input.closingTime)
 
             const response = await axios.post(
                 `${import.meta.env.VITE_BASEURL}/resturant/create`,
@@ -88,15 +92,21 @@ const AddRestaurant = () => {
             alert("Restaurant Added Successfully!");
             setLoading(true);
             setInput()
-           
+
 
         } catch (error) {
             console.log(error)
 
         }
         finally {
-            setLoading(false); 
-            navigate("/admin/restaurant")
+            setLoading(false);
+            if (user?.role === "admin") {
+                navigate("/admin/restaurant")
+            }
+            else {
+                navigate("/restaurant-owner/partner-with-us")
+            }
+
         }
     };
 
@@ -153,6 +163,33 @@ const AddRestaurant = () => {
                         />
                     </div>
 
+                    <div>
+                        <Label>Opening Time</Label>
+                        <Input
+                            type="time"
+                            name="openingTime"
+                            value={input.openingTime}
+                            onChange={handleChange}
+                            placeholder="Enter the time in 24Hr format"
+
+                            required
+                        />
+
+
+                    </div>
+                    <div>
+                        <Label>Closing Time</Label>
+                        <Input
+                            type="time"
+                            name="closingTime"
+                            value={input.closingTime}
+                            onChange={handleChange}
+                            placeholder="Enter the time in 24Hr format"
+                            required
+                        />
+
+                    </div>
+
                     {/* Cuisine Selection */}
                     <div>
                         <Label>Cuisines</Label>
@@ -178,6 +215,7 @@ const AddRestaurant = () => {
                             </div>
                         )}
                     </div>
+
 
                     <div>
                         <Label>Upload Restaurant Banner</Label>

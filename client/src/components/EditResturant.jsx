@@ -31,7 +31,9 @@ const EditRestaurant = ({ restaurant }) => {
         deliveryTime: restaurant?.deliveryTime || "30",
         cuisines: restaurant?.cuisines || [],
         imageUrl: restaurant?.imageUrl || "",
-        newImage: null, // Store new uploaded image
+        newImage: null,
+        openingTime: restaurant?.openingTime,
+        closingTime: restaurant?.closingTime
     });
 
     // Handle input changes
@@ -82,6 +84,9 @@ const EditRestaurant = ({ restaurant }) => {
             formDataToSend.append("country", formData.country);
             formDataToSend.append("deliveryTime", formData.deliveryTime);
             formDataToSend.append("cuisines", [formData.cuisines]);
+            formDataToSend.append("openingTime", formData.openingTime);
+            formDataToSend.append("closingTime", formData.closingTime);
+
             if (formData.newImage) {
                 formDataToSend.append("image", formData.newImage);
             }
@@ -96,7 +101,8 @@ const EditRestaurant = ({ restaurant }) => {
                 }
             );
             // navigate(`/admin/partner-with-us/${restaurant?._id}`, { state: { restaurant: res.data.restaurant } });
-            window.location.href = `/admin/partner-with-us/${restaurant?._id}`;
+            // window.location.href = `/admin/partner-with-us/${restaurant?._id}`;
+            navigate(-1)
         } catch (error) {
             console.error("Error updating restaurant:", error);
         }
@@ -118,7 +124,7 @@ const EditRestaurant = ({ restaurant }) => {
                     </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={handleSubmit}>
-                    <div className="grid gap-4 py-4">
+                    <div className="grid gap-2 py-4">
                         {/* Image Preview */}
                         {formData.imageUrl && (
                             <div className="flex justify-center">
@@ -187,7 +193,33 @@ const EditRestaurant = ({ restaurant }) => {
                                 className="col-span-3"
                             />
                         </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="openingTime" className="text-right">Opening Time</Label>
+                            <Input
+                                type="time"
+                                name="openingTime"
+                                value={formData.openingTime}
+                                onChange={handleInputChange}
+                                placeholder="Enter the time in 24Hr format"
+                                className="col-span-3"
+                                required
+                            />
 
+
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="closingTime" className="text-right">Closing Time</Label>
+                            <Input
+                                type="time"
+                                name="closingTime"
+                                value={formData.closingTime}
+                                onChange={handleInputChange}
+                                placeholder="Enter the time in 24Hr format"
+                                required
+                                className="col-span-3"
+                            />
+
+                        </div>
                         {/* Cuisine Selection */}
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="cuisines" className="text-right">

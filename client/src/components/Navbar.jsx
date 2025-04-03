@@ -75,7 +75,9 @@ const Navbar = () => {
           <div className="hidden md:flex items-center gap-6">
             <Link to="/">Home</Link>
             {
-              user?.role === "user" && (<Menubar>
+              user?.role === "user" &&
+               (
+               <Menubar>
                 <MenubarMenu>
                   <MenubarTrigger>Dashboard</MenubarTrigger>
                   <MenubarContent >
@@ -90,7 +92,8 @@ const Navbar = () => {
                     </Link>
                   </MenubarContent>
                 </MenubarMenu>
-              </Menubar>)
+              </Menubar>
+              )
             }
             {user?.role === "admin" && (
               <Menubar>
@@ -133,7 +136,7 @@ const Navbar = () => {
             </Link>
             <Link to="/profile">
               <Avatar>
-                <AvatarImage src="path-to-your-image.jpg" alt="profilephoto" />
+                <AvatarImage src={user?.profilePicture} alt="profilephoto" />
                 <AvatarFallback>CN</AvatarFallback>
               </Avatar>
             </Link>

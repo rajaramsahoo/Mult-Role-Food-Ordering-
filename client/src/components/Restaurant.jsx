@@ -96,14 +96,21 @@ const Restaurant = () => {
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <h1 className="text-2xl font-bold">Explore Restaurant</h1>
           <div className="flex items-center gap-2 w-full sm:w-auto">
-            {user.role !== "user" && (
+            {(user.role === "admin" || user.role === "restaurantOwner") && (
               <Button
                 className="bg-orange text-white hover:bg-amber-100 hover:text-orange"
-                onClick={() => navigate("/admin/partner-with-us")}
+                onClick={() => {
+                  if (user?.role === "admin") {
+                    navigate("/admin/partner-with-us");
+                  } else if (user?.role === "restaurantOwner") {
+                    navigate("/restaurant-owner-dashboard/new-patner");
+                  }
+                }}
               >
                 <Plus /> Add Restaurant
               </Button>
             )}
+
 
             <div className="relative w-full sm:w-[300px]">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -313,14 +320,21 @@ const Restaurant = () => {
           </div>
 
           <TabsContent value="all" className="mt-0">
-            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 ">
               {paginatedItems.map((item) => (
                 <Link
-                to={user.role === "user" ? `/restaurant/${item._id}` : `/admin/partner-with-us/${item._id}`}
+                  to={
+                    user.role === "user"
+                      ? `/restaurant/${item._id}`
+                      : user.role === "restaurantOwner"
+                        ? `/restaurant-owner/partner-with-us/${item._id}`
+                        : `/admin/partner-with-us/${item._id}`
+                  }
                   state={{ restaurant: item }}
                   key={item._id}
                   className="group"
                 >
+
                   <Card className="overflow-hidden ">
                     <div className="relative">
                       <img

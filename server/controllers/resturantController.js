@@ -2,7 +2,7 @@ import uploadImage from "../utils/uploadImage.js";
 import resturantModel from "../models/resturantModel.js";
 export const createRestaurant = async (req, res) => {
   try {
-    const { restaurantName, city, country, deliveryTime, cuisines } = req.body;
+    const { restaurantName, city, country, deliveryTime, cuisines, openingTime, closingTime } = req.body;
     if (!req.file) return res.status(400).json({ success: false, message: "Image is required" });
 
     const existingRestaurant = await resturantModel.findById(req.payload._id);
@@ -17,6 +17,9 @@ export const createRestaurant = async (req, res) => {
       deliveryTime,
       cuisines: cuisines,
       imageUrl,
+      openingTime,
+      closingTime,
+      createdBy: req.payload.email
     });
 
     res.status(201).json({ success: true, message: "Restaurant Added" });
@@ -43,7 +46,7 @@ export const editRestaurant = async (req, res) => {
   try {
     const { restaurantId } = req.params;
     const { _id, role } = req.payload;
-    const { restaurantName, city, country, deliveryTime, cuisines } = req.body;
+    const { restaurantName, city, country, deliveryTime, cuisines, openingTime, closingTime } = req.body;
 
     const restaurant = await resturantModel.findById(restaurantId);
     if (!restaurant) {
@@ -66,6 +69,8 @@ export const editRestaurant = async (req, res) => {
       deliveryTime,
       cuisines,
       imageUrl,
+      openingTime,
+      closingTime
     };
 
     const updatedRestaurant = await resturantModel.findByIdAndUpdate(
@@ -134,7 +139,21 @@ export const makeRestaurantApproved = async (req, res) => {
   }
 };
 
-// Fixing extra space in the route path
 
 
 
+export const getRestaurantByOwner = async (req, res) => {
+  try {
+    const { ownerId } = req.params;
+    console.log(ownerId)
+    const restaurant = await resturantModel.find({ owner: ownerId });
+
+    if (!restaurant) {
+      return res.status(404).json({ success: false, message: "Restaurant not found" });
+    }
+
+    res.status(200).json({ success: true, restaurant });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Server Error", error });
+  }
+};

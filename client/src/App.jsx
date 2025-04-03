@@ -24,8 +24,18 @@ import AddMenu from "./components/AddMenu";
 import Profile from "./components/Profile";
 import EditResturant from "./components/EditResturant";
 import SingleMenu from "./components/SingleMenu";
+import AddRestaurant from "./components/AddResturant";
 function App() {
   const { user, setUser, loading, setLoading } = useContext(AuthContext)
+
+  // const fetchResturantData = async() => {
+  //   try {
+
+  //   } catch (error) {
+  //     console.log(error)
+  //   }
+  // }
+
   return (
 
     <Routes>
@@ -38,6 +48,7 @@ function App() {
         <Route path="/restaurant/:id" element={<SingleRestaurant />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/orders" element={<Orders />} />
 
       </Route>
       <Route element={<AdministratorRoutes user={user} />}>
@@ -53,10 +64,13 @@ function App() {
       </Route>
       <Route element={<RestaurantOwnerPrivateRoute user={user} />}>
         <Route path="/restaurant-owner-dashboard" element={<ResturantOwnerDashboard />} />
+        <Route path="/restaurant-owner-dashboard/new-patner" element={<AddRestaurant />} />
         <Route path="/restaurant-owner/menu" element={<Menu />} />
-        <Route path="/restaurant-owner/partner-with-us" element={<SingleRestaurant />} />
+        <Route path="/restaurant-owner/partner-with-us" element={<Restaurant />} />
+        <Route path="/restaurant-owner/partner-with-us/:id" element={<SingleRestaurant />} />
         <Route path="/restaurant-owner/partner" element={<AllUsers />} />
         <Route path="/restaurant-owner/orders" element={<Orders />} />
+        <Route path="/restaurant-owner/new-item" element={<AddMenu />} />
 
       </Route>
       <Route path="/signup" element={<Signup />} />

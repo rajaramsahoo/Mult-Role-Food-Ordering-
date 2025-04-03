@@ -78,8 +78,18 @@ const AddMenu = () => {
             });
 
             console.log(response.data);
-            // navigate(`/admin/restaurant/${resId}`);
-            window.location.href = `/admin/partner-with-us/${resId}`;
+            //    // navigate(`/admin/restaurant/${resId}`);
+            //     if (user?.role === "admin") {
+            //         // window.location.href = `/admin/partner-with-us/${resId}`;
+            //        // navigate(`/admin/restaurant/${resId}`);
+
+            //     }
+            //     else if (user?.role === "restaurantOwner") {
+            //         // window.location.href = `/restaurant-owner/partner-with-us/${resId}`
+            //         //navigate(`/restaurant-owner/partner-with-us/${resId}`);
+
+            //     }
+            navigate(-1)
 
         } catch (error) {
             console.error("Error adding menu item:", error);

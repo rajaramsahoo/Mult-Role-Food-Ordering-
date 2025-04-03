@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useContext, useEffect, useState } from "react"
 import { Clock, MapPin, Plus, Star } from "lucide-react"
 import {
   DropdownMenu,
@@ -15,16 +15,19 @@ import { Badge } from "@/components/ui/badge"
 import { useLocation, useNavigate, useParams } from "react-router-dom"
 import EditResturant from "./EditResturant"
 import axios from "axios"
+import { AuthContext } from "@/context/AuthProvider"
 const SingleRestaurant = () => {
   const token = JSON.parse(localStorage.getItem("token"))?.token || ""
 
   const location = useLocation()
   const { id } = useParams()
   const [restaurant, setRestaurant] = useState(location?.state?.restaurant || null)
+  console.log(restaurant)
   const [menuCategories, setMenuCategories] = useState([])
   //const restaurant = location?.state?.restaurant
   const navigate = useNavigate()
-  
+  const { user } = useContext(AuthContext)
+  console.log(user?.role)
   useEffect(() => {
     if (restaurant?._id) {
       fetchRestaurantData()
@@ -98,8 +101,8 @@ const SingleRestaurant = () => {
       <div className="flex flex-col gap-6">
         <div className="relative rounded-lg overflow-hidden">
           <img
-            src={restaurant.imageUrl || "/placeholder.svg"}
-            alt={restaurant.name}
+            src={restaurant?.imageUrl || "/placeholder.svg"}
+            alt={restaurant?.name}
             style={{ width: "100%", height: "180px" }}
             className="w-full h-64 sm:h-80 object-cover"
           />
@@ -108,23 +111,19 @@ const SingleRestaurant = () => {
           </div>
 
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex flex-col justify-end p-6">
-            <h1 className="text-2xl sm:text-3xl font-bold text-white">{restaurant.restaurantName}</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-white">{restaurant?.restaurantName}</h1>
             <div className="flex flex-wrap items-center gap-3 mt-2">
               <Badge className="bg-white text-black">
                 <Star className="h-3 w-3 mr-1 fill-yellow-400 text-yellow-400" />
-                {restaurant.rating} ({restaurant.reviews} reviews)
+                {restaurant?.rating} ({restaurant?.reviews} reviews)
               </Badge>
               <span className="text-white text-sm">
-                {restaurant.cuisines.length > 0
-                  ? Array.isArray(restaurant.cuisines) // Check if it's an array
-                    ? restaurant.cuisines.join(", ") // Join directly if it's an array
-                    : restaurant.cuisines // Use it as is if it's already a string
-                  : ""}
+                {restaurant?.cuisines}
               </span>
 
               <span className="text-white text-sm flex items-center">
-                <Clock className="h-3 w-3 mr-1" />
-                {restaurant.deliveryTime}
+                <Clock className="h-3 w-3 mr-1 " />
+                {restaurant?.deliveryTime}min
               </span>
             </div>
           </div>
@@ -136,16 +135,16 @@ const SingleRestaurant = () => {
               <div className="flex items-center text-sm">
                 <MapPin className="h-4 w-4 mr-1 text-muted-foreground" />
                 <span>
-                  {restaurant.city},{restaurant.country}
+                  {restaurant?.city},{restaurant?.country}
                 </span>
               </div>
               <div className="flex items-center text-sm">
                 <Clock className="h-4 w-4 mr-1 text-muted-foreground" />
-                <span>{restaurant.openingHours}AM</span>
+                <span>{restaurant?.openingTime}AM - {restaurant?.closingTime}PM </span>
               </div>
             </div>
 
-            <p className="text-muted-foreground mb-6">{restaurant.description}</p>
+            <p className="text-muted-foreground mb-6">{restaurant?.description}</p>
 
             <Tabs defaultValue="menu" className="w-full">
               <TabsList className="mb-6">
@@ -153,22 +152,42 @@ const SingleRestaurant = () => {
                 <TabsTrigger value="reviews">Reviews</TabsTrigger>
                 <TabsTrigger value="info">Info</TabsTrigger>
               </TabsList>
-              <Button
-                className="bg-orange hover:bg-hoverOrange m-4"
-                onClick={() => navigate(`/admin/new-item`, { state: { resId: restaurant._id } })}
-              >
-                <Plus className="" />
-                Add Menu
-              </Button>
-              <DropdownMenu className="p-4">
-                <DropdownMenuTrigger asChild>
-                  <Button className="bg-orange hover:bg-hoverOrange m-4">{restaurant.status}</Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="center" className="w-16">
-                  <DropdownMenuLabel onClick={() => makeRestaurantApproved("approved")}>Approve</DropdownMenuLabel>
-                  <DropdownMenuLabel onClick={() => makeRestaurantApproved("rejected")}>Reject</DropdownMenuLabel>
-                </DropdownMenuContent>
-              </DropdownMenu>
+
+              {
+                user?.role === "admin" &&
+                <Button
+                  className="bg-orange hover:bg-hoverOrange m-4"
+                  onClick={() => navigate(`/admin/new-item`, { state: { resId: restaurant._id } })}
+                >
+                  <Plus className="" />
+                  Add Menu
+                </Button>
+              }
+
+
+              {
+                user?.role === "restaurantOwner" &&
+                <Button
+                  className="bg-orange hover:bg-hoverOrange m-4"
+                  onClick={() => navigate(`/restaurant-owner/new-item`, { state: { resId: restaurant._id } })}
+                >
+                  <Plus className="" />
+                  Add Menu
+                </Button>
+              }
+
+              {
+                user?.role === "admin" && <DropdownMenu className="p-4">
+                  <DropdownMenuTrigger asChild>
+                    <Button className="bg-orange hover:bg-hoverOrange m-4">{restaurant?.status}</Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="center" className="w-16">
+                    <DropdownMenuLabel onClick={() => makeRestaurantApproved("approved")}>Approve</DropdownMenuLabel>
+                    <DropdownMenuLabel onClick={() => makeRestaurantApproved("rejected")}>Reject</DropdownMenuLabel>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              }
+
 
               <TabsContent value="menu" className="mt-0 space-y-8">
 
@@ -239,7 +258,7 @@ const SingleRestaurant = () => {
               <CardContent className="p-0">
                 <div className="p-4 border-b">
                   <h3 className="font-semibold text-lg">Your Order</h3>
-                  <p className="text-sm text-muted-foreground">From {restaurant.restaurantName}</p>
+                  <p className="text-sm text-muted-foreground">From {restaurant?.restaurantName}</p>
                 </div>
 
                 {/* Empty state - show this when cart is empty */}

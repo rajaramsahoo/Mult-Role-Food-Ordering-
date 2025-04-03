@@ -26,6 +26,10 @@ const menuSchema = new mongoose.Schema({
   },
   cusine: { type: String, required: true },
   isAvailable: { type: Boolean, default: true },
+  createdBy: {
+    type: String,
+    required: true
+  },
 }, { timestamps: true });
 
 export default mongoose.model("menuModel", menuSchema);

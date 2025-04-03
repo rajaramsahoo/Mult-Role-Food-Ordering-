@@ -8,15 +8,17 @@ import { ResProvider } from './context/ResProvider'
 import { MenuProvider } from './context/MenuProvider'
 import { CartProvider } from './context/CartProvider'
 createRoot(document.getElementById('root')).render(
-  <StrictMode>
-    <BrowserRouter>
+
+  <BrowserRouter>
+    <AuthProvider>
       <CartProvider>
-        <MenuProvider> <ResProvider>
-          <AuthProvider>
+        <MenuProvider>
+          <ResProvider>
             <App />
-          </AuthProvider>
-        </ResProvider></MenuProvider>
+          </ResProvider>
+        </MenuProvider>
       </CartProvider>
-    </BrowserRouter>
-  </StrictMode>,
+    </AuthProvider>
+  </BrowserRouter>
+
 )
